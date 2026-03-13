@@ -103,4 +103,8 @@ public class ModConfig {
             ModEvents.clearEnchantmentCache();
         }
     }
+
+    public static boolean isBoss(String entityId) {
+        return CACHED_BOSS_LIST.contains(entityId);
+    }
 }

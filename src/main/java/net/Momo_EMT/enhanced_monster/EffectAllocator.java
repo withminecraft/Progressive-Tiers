@@ -40,21 +40,25 @@ public class EffectAllocator {
     public static final String TANKY = NBT_PREFIX + "tanky";            // 重甲
 
     public static void apply(LivingEntity entity) {
-        if (entity.level().isClientSide || !(entity instanceof Enemy)) return;
+        if (entity.level().isClientSide) return;
+
+        var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+        if (resourceLocation == null) return;
+        String entityId = resourceLocation.toString();
+
+        boolean isMobBoss = ModConfig.CACHED_BOSS_LIST.contains(entityId);
+
+        if (!isMobBoss) {
+            if (!(entity instanceof Enemy)) return; 
+            if (!isAllowed(entity)) return;         
+        }
 
         entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
             if (cap.isProcessed()) return;
             
-            if (!isAllowed(entity)) {
-                cap.setProcessed(true);
-                return;
-            }
-
             boolean isUndead = entity.isInvertedHealAndHarm();
             int quality;
             int count;
-            
-            boolean isMobBoss = isBoss(entity);
 
             if (isMobBoss) {
                 quality = 3;
@@ -213,7 +217,6 @@ public class EffectAllocator {
     private static boolean isBoss(LivingEntity entity) {
         var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         if (resourceLocation == null) return false;
-
         return ModConfig.CACHED_BOSS_LIST.contains(resourceLocation.toString());
     }
 }

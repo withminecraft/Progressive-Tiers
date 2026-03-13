@@ -39,8 +39,14 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof Enemy && event.getObject() instanceof LivingEntity) {
-            event.addCapability(new ResourceLocation(EnhancedMonster.MODID, "traits"), new MobTraitProvider());
+        if (event.getObject() instanceof LivingEntity living) {
+            String entityId = ForgeRegistries.ENTITY_TYPES.getKey(living.getType()).toString();
+            
+            boolean isListedBoss = ModConfig.isBoss(entityId); 
+            
+            if (isListedBoss || (living instanceof Enemy)) {
+                event.addCapability(new ResourceLocation(EnhancedMonster.MODID, "traits"), new MobTraitProvider());
+            }
         }
     }
 
@@ -93,6 +99,11 @@ public class ModEvents {
         
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide) return;
+
+        if (entity.getPersistentData().getBoolean("em_loot_generated")) {
+            return;
+        }
+        entity.getPersistentData().putBoolean("em_loot_generated", true);
 
         entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
             int quality = cap.getQuality();
