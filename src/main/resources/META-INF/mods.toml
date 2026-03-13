@@ -4,11 +4,11 @@ license="All rights reserved"
 
 [[mods]]
 modId="enhanced_monster" 
-version="${mod_version}"
-displayName="Enhanced Monster" 
+version="1.1"
+displayName="Progressive Tiers" 
 authors="Momo_EMT"
 description='''
-给予敌对生物梯度加成的药水效果。
+Tiered Buff Modifiers for Hostile Creatures.
 '''
 
 [[dependencies.enhanced_monster]] 
