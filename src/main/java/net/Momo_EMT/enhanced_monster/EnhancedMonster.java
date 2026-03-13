@@ -1,0 +1,61 @@
+package net.Momo_EMT.enhanced_monster;
+
+import net.Momo_EMT.enhanced_monster.capability.IMobTrait;
+import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait; 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig.Type;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
+
+@Mod(EnhancedMonster.MODID)
+public class EnhancedMonster {
+    public static final String MODID = "enhanced_monster";
+
+    private static final String PROTOCOL_VERSION = "1";
+    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation(EnhancedMonster.MODID, "main"),
+        () -> PROTOCOL_VERSION,
+        PROTOCOL_VERSION::equals,
+        PROTOCOL_VERSION::equals
+    );
+
+    public EnhancedMonster(FMLJavaModLoadingContext context) {
+        IEventBus modEventBus = context.getModEventBus();
+
+        context.registerConfig(Type.COMMON, net.Momo_EMT.enhanced_monster.ModConfig.SPEC, "enhanced_monster-common.toml");
+        
+        modEventBus.addListener(this::onConfigLoading);
+        modEventBus.addListener(this::onConfigReloading);
+        
+        modEventBus.addListener(this::registerCaps);
+        
+        int id = 0;
+        CHANNEL.registerMessage(id++, 
+            PacketSyncMobTrait.class, 
+            PacketSyncMobTrait::encode, 
+            PacketSyncMobTrait::decode, 
+            PacketSyncMobTrait::handle
+        );
+    }
+
+    private void onConfigLoading(ModConfigEvent.Loading event) {
+        if (event.getConfig().getSpec() == net.Momo_EMT.enhanced_monster.ModConfig.SPEC) {
+            net.Momo_EMT.enhanced_monster.ModConfig.bakeConfig();
+        }
+    }
+
+    private void onConfigReloading(ModConfigEvent.Reloading event) {
+        if (event.getConfig().getSpec() == net.Momo_EMT.enhanced_monster.ModConfig.SPEC) {
+            net.Momo_EMT.enhanced_monster.ModConfig.bakeConfig();
+        }
+    }
+
+    private void registerCaps(RegisterCapabilitiesEvent event) {
+        event.register(IMobTrait.class);
+    }
+}
