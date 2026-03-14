@@ -78,11 +78,19 @@ public class ModEvents {
         return CACHED_ENCHANTMENTS;
     }
 
-    private static float getBerserkDamage(float baseDamage) {
+    private static float getBerserkAttackDamage(float baseDamage) {
         if (baseDamage < 40.0f) {
             return baseDamage * 1.5f;
         } else {
             return baseDamage + 20.0f; 
+        }
+    }
+
+    private static float getBerserkVulnerabilityDamage(float baseDamage) {
+        if (baseDamage < 60.0f) {
+            return baseDamage * 1.2f; 
+        } else {
+            return baseDamage + 12.0f; 
         }
     }
 
@@ -159,7 +167,7 @@ public class ModEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingAttack(LivingAttackEvent event) {
         LivingEntity victim = event.getEntity();
         if (victim.level().isClientSide) return;
@@ -175,7 +183,7 @@ public class ModEvents {
         });
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHurt(LivingHurtEvent event) {
         if (event.getAmount() <= 0 || event.getEntity().level().isClientSide) return;
 
@@ -186,7 +194,7 @@ public class ModEvents {
         if (attacker != null && attacker.isAlive()) {
             attacker.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(atkCap -> {
                 if (atkCap.getTraits().containsKey(EffectAllocator.BERSERK)) {
-                    damage[0] = getBerserkDamage(damage[0]);
+                    damage[0] = getBerserkAttackDamage(damage[0]); 
                     if (attacker.level() instanceof ServerLevel serverLevel) {
                         serverLevel.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.1, 0.1, 0.1, 0.5);
                     }
@@ -196,7 +204,7 @@ public class ModEvents {
         
         victim.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(vicCap -> {
             if (vicCap.getTraits().containsKey(EffectAllocator.BERSERK)) {
-                damage[0] = getBerserkDamage(damage[0]);
+                damage[0] = getBerserkVulnerabilityDamage(damage[0]); 
             }
         });
 
@@ -205,7 +213,7 @@ public class ModEvents {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
         if (event.getAmount() <= 0 || event.getEntity().level().isClientSide) return;
 
