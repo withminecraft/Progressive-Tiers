@@ -131,8 +131,8 @@ public class EffectAllocator {
         int roll = RANDOM.nextInt(1000);
         return switch (tier) {
             case 1 -> (roll < 900) ? 1 : (roll < 995 ? 2 : 3);
-            case 2 -> (roll < 500) ? 1 : (roll < 950 ? 2 : 3);
-            default -> (roll < 50) ? 1 : (roll < 600 ? 2 : 3);
+            case 2 -> (roll < 450) ? 1 : (roll < 950 ? 2 : 3);
+            default -> (roll < 50) ? 1 : (roll < 500 ? 2 : 3);
         };
     }
 
