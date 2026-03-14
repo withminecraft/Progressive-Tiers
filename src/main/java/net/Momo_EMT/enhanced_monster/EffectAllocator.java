@@ -27,7 +27,7 @@ public class EffectAllocator {
     public static final String TAG_PROCESSED = "EM_Processed";
 
     public static final String NBT_PREFIX = "EM_Effect_";
-    public static final String POWERFUL = NBT_PREFIX + "powerful";       // 强力
+    public static final String POWERFUL = NBT_PREFIX + "powerful";      // 强力
     public static final String REGENERATING = NBT_PREFIX + "regenerating";      // 再生
     public static final String SPEEDY = NBT_PREFIX + "speedy";          // 神速
     public static final String PROTECTED = NBT_PREFIX + "protected";    // 保护

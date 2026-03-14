@@ -79,18 +79,14 @@ public class ModEvents {
     }
 
     private static float getBerserkAttackDamage(float baseDamage) {
-        if (baseDamage < 40.0f) {
-            return baseDamage * 1.5f;
-        } else {
-            return baseDamage + 20.0f; 
-        }
+        return baseDamage * 1.5f;
     }
 
     private static float getBerserkVulnerabilityDamage(float baseDamage) {
-        if (baseDamage < 60.0f) {
+        if (baseDamage < 60.0f) {    
             return baseDamage * 1.2f; 
         } else {
-            return baseDamage + 12.0f; 
+            return baseDamage + 12.0f;
         }
     }
 
