@@ -266,7 +266,6 @@ public class ModEvents {
             if (nbt.contains(EffectAllocator.TAG_QUALITY)) {
                 int quality = nbt.getInt(EffectAllocator.TAG_QUALITY);
                 boolean isBoss = nbt.getBoolean("IsBoss");
-                
                 if (quality >= 2 || isBoss) {
                     net.Momo_EMT.enhanced_monster.client.ClientParticles.spawnParticles(entity, quality, isBoss);
                 }
@@ -274,19 +273,13 @@ public class ModEvents {
             return; 
         }
 
-        if (entity.tickCount % 20 != 0 || entity.getHealth() >= entity.getMaxHealth()) {
-            return;
+        if (entity.isAlive() && entity.tickCount % 20 == 0 && entity.getHealth() < entity.getMaxHealth()) {
+            entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
+                Integer regenLevel = cap.getTraits().get(EffectAllocator.REGENERATING);
+                if (regenLevel != null) {
+                    entity.heal((regenLevel + 1) * 0.5f);
+                }
+            });
         }
-
-        if (!entity.getPersistentData().contains(EffectAllocator.REGENERATING)) {
-            return;
-        }
-
-        entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
-            Integer regenLevel = cap.getTraits().get(EffectAllocator.REGENERATING);
-            if (regenLevel != null) {
-                entity.heal((regenLevel + 1) * 0.5f);
-            }
-        });
     }
 }
