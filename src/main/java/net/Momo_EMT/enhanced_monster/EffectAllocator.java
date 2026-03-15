@@ -184,7 +184,7 @@ public class EffectAllocator {
         if (tag.equals(POWERFUL)) {
             var attr = entity.getAttribute(Attributes.ATTACK_DAMAGE);
             if (attr != null) {
-                attr.addPermanentModifier(new AttributeModifier(DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 2.0, AttributeModifier.Operation.ADDITION));
+                attr.addPermanentModifier(new AttributeModifier(DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 3.0, AttributeModifier.Operation.ADDITION));
             }
         }
         if (tag.equals(SPEEDY)) {
