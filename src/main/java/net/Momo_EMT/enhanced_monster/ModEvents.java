@@ -178,8 +178,7 @@ public class ModEvents {
         if (attacker != null && attacker.isAlive()) {
             attacker.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(atkCap -> {
                 if (atkCap.getTraits().containsKey(EffectAllocator.BERSERK)) {
-                    int level = atkCap.getTraits().get(EffectAllocator.BERSERK) + 1; 
-                    damage[0] = damage[0] * (1.0f + level * 0.5f); 
+                    damage[0] = damage[0] * 1.5f; 
                     
                     if (attacker.level() instanceof ServerLevel serverLevel) {
                         serverLevel.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.1, 0.1, 0.1, 0.5);
@@ -187,16 +186,6 @@ public class ModEvents {
                 }
             });
         }
-
-        victim.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(vicCap -> {
-            if (vicCap.getTraits().containsKey(EffectAllocator.BERSERK) && vicCap.getTraits().get(EffectAllocator.BERSERK) >= 1) {
-                if (damage[0] < 100f) {
-                    damage[0] *= 1.2f; 
-                } else {
-                    damage[0] += 20f;  
-                }
-            }
-        });
 
         if (damage[0] != event.getAmount()) {
             event.setAmount(damage[0]);
