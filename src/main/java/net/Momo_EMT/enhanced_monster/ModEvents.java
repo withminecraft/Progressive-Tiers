@@ -82,14 +82,6 @@ public class ModEvents {
         return baseDamage * 1.5f;
     }
 
-    private static float getBerserkVulnerabilityDamage(float baseDamage) {
-        if (baseDamage < 100.0f) {    
-            return baseDamage * 1.2f; 
-        } else {
-            return baseDamage + 20.0f;
-        }
-    }
-
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onEntitySpawn(EntityJoinLevelEvent event) {
         if (event.getEntity() instanceof LivingEntity living && !event.getLevel().isClientSide && living.isAlive()) {
@@ -197,12 +189,6 @@ public class ModEvents {
                 }
             });
         }
-        
-        victim.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(vicCap -> {
-            if (vicCap.getTraits().containsKey(EffectAllocator.BERSERK)) {
-                damage[0] = getBerserkVulnerabilityDamage(damage[0]); 
-            }
-        });
 
         if (damage[0] != event.getAmount()) {
             event.setAmount(damage[0]);
