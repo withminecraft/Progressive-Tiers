@@ -168,7 +168,7 @@ public class EffectAllocator {
 
     private static void applyImmediateAttributes(LivingEntity entity, String tag, int level) {
         if (tag.equals(POWERFUL)) {
-            safeApplyModifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 3.0, AttributeModifier.Operation.ADDITION);
+            safeApplyModifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 2.0, AttributeModifier.Operation.ADDITION);
         } else if (tag.equals(SPEEDY)) {
             safeApplyModifier(entity, Attributes.MOVEMENT_SPEED, SPEED_MODIFIER_UUID, "EM Speed Bonus", (level + 1) * 0.1, AttributeModifier.Operation.MULTIPLY_BASE);
         } else if (tag.equals(TANKY)) {
