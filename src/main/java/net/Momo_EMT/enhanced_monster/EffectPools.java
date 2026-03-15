@@ -22,11 +22,11 @@ public class EffectPools {
         
         if (isBoss) {
             addFixed(list, EffectAllocator.PROTECTED, 4); // 保护 V
-            addFixed(list, EffectAllocator.POWERFUL, 4);  // 强力 V
+            addFixed(list, EffectAllocator.POWERFUL, 5);  // 强力 VI
             addFixed(list, EffectAllocator.REGENERATING, 3);      // 再生 IV
             addFixed(list, EffectAllocator.STRAY, 2);
             addFixed(list, EffectAllocator.WEAKENER, 2);
-            addFixed(list, EffectAllocator.BERSERK, 1);
+            addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addFixed(list, EffectAllocator.TANKY, 4);
             addFixed(list, EffectAllocator.VOID, 1);
@@ -37,7 +37,7 @@ public class EffectPools {
         
         if (quality == 1) { // 1级池
             addFixed(list, EffectAllocator.PROTECTED, 0); // 保护 I
-            addFixed(list, EffectAllocator.POWERFUL, 0);  // 强力 I
+            addRand(list, EffectAllocator.POWERFUL, 0, 1);  // 强力 I-II
             addRand(list, EffectAllocator.REGENERATING, 0, 1);     // 再生 I-II
             addRand(list, EffectAllocator.SPEEDY, 0, 1);    // 神速 I-II
             addFixed(list, EffectAllocator.POISONOUS, 0);
@@ -46,7 +46,7 @@ public class EffectPools {
             addFixed(list, EffectAllocator.TANKY, 0);
         } else if (quality == 2) { // 2级池
             addRand(list, EffectAllocator.PROTECTED, 1, 2);
-            addRand(list, EffectAllocator.POWERFUL, 1, 2);
+            addRand(list, EffectAllocator.POWERFUL, 2, 3);
             addRand(list, EffectAllocator.REGENERATING, 1, 2);
             addRand(list, EffectAllocator.SPEEDY, 1, 2);
             addRand(list, EffectAllocator.POISONOUS, 0, 1);
@@ -57,7 +57,7 @@ public class EffectPools {
             addRand(list, EffectAllocator.TANKY, 1, 2);
         } else if (quality == 3) { // 3级池
             addRand(list, EffectAllocator.PROTECTED, 3, 4);
-            addRand(list, EffectAllocator.POWERFUL, 3, 4);
+            addRand(list, EffectAllocator.POWERFUL, 4, 5);
             addRand(list, EffectAllocator.REGENERATING, 2, 3);
             addRand(list, EffectAllocator.SPEEDY, 2, 3);
             addRand(list, EffectAllocator.POISONOUS, 1, 2);
