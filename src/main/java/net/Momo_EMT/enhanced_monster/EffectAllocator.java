@@ -2,9 +2,10 @@ package net.Momo_EMT.enhanced_monster;
 
 import net.Momo_EMT.enhanced_monster.capability.IMobTrait;
 import net.Momo_EMT.enhanced_monster.capability.MobTraitProvider;
-import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait; 
+import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Enemy;
@@ -15,7 +16,7 @@ import java.util.*;
 
 public class EffectAllocator {
     private static final Random RANDOM = new Random();
-    
+
     private static final UUID HEALTH_MODIFIER_UUID = UUID.fromString("e6b98e8a-3601-447a-8f64-460d2e85a567");
     private static final UUID DAMAGE_MODIFIER_UUID = UUID.fromString("7f4f6b8c-5d1e-4c7b-9f0a-2d3e4f5a6b7c");
     private static final UUID SPEED_MODIFIER_UUID = UUID.fromString("a1b2c3d4-e5f6-4a5b-bc6d-7e8f9a0b1c2d");
@@ -24,21 +25,19 @@ public class EffectAllocator {
     private static final UUID KNOCKBACK_MODIFIER_UUID = UUID.fromString("550e8400-e29b-41d4-a716-446655440000");
 
     public static final String TAG_QUALITY = "EnhancedMonsterQuality";
-    public static final String TAG_PROCESSED = "EM_Processed";
-
     public static final String NBT_PREFIX = "EM_Effect_";
-    public static final String POWERFUL = NBT_PREFIX + "powerful";      // 强力
-    public static final String REGENERATING = NBT_PREFIX + "regenerating";      // 再生
-    public static final String SPEEDY = NBT_PREFIX + "speedy";          // 神速
-    public static final String PROTECTED = NBT_PREFIX + "protected";    // 保护
-    public static final String FIRE_PROT = NBT_PREFIX + "fire_prot";    // 阻燃
-    public static final String POISONOUS = NBT_PREFIX + "poisonous";    // 剧毒
-    public static final String STRAY = NBT_PREFIX + "stray";            // 凝滞
-    public static final String WEAKENER = NBT_PREFIX + "weakener";              // 衰竭
-    public static final String BERSERK = NBT_PREFIX + "berserk";        // 狂暴
-    public static final String LIFESTEAL = NBT_PREFIX + "lifesteal";    // 嗜血
-    public static final String TANKY = NBT_PREFIX + "tanky";            // 重甲
-    public static final String VOID = NBT_PREFIX + "void";            // 虚无
+    public static final String POWERFUL = NBT_PREFIX + "powerful";
+    public static final String REGENERATING = NBT_PREFIX + "regenerating";
+    public static final String SPEEDY = NBT_PREFIX + "speedy";
+    public static final String PROTECTED = NBT_PREFIX + "protected";
+    public static final String FIRE_PROT = NBT_PREFIX + "fire_prot";
+    public static final String POISONOUS = NBT_PREFIX + "poisonous";
+    public static final String STRAY = NBT_PREFIX + "stray";
+    public static final String WEAKENER = NBT_PREFIX + "weakener";
+    public static final String BERSERK = NBT_PREFIX + "berserk";
+    public static final String LIFESTEAL = NBT_PREFIX + "lifesteal";
+    public static final String TANKY = NBT_PREFIX + "tanky";
+    public static final String VOID = NBT_PREFIX + "void";
 
     public static void apply(LivingEntity entity) {
         if (entity.level().isClientSide) return;
@@ -50,13 +49,12 @@ public class EffectAllocator {
         boolean isMobBoss = ModConfig.CACHED_BOSS_LIST.contains(entityId);
 
         if (!isMobBoss) {
-            if (!(entity instanceof Enemy)) return; 
-            if (!isAllowed(entity)) return;         
+            if (!(entity instanceof Enemy) || !isAllowed(entity)) return;
         }
 
         entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
             if (cap.isProcessed()) return;
-            
+
             boolean isUndead = entity.isInvertedHealAndHarm();
             int quality;
             int count;
@@ -85,19 +83,18 @@ public class EffectAllocator {
             cap.setProcessed(true);
             cap.setBoss(isMobBoss);
 
-            syncToPersistentData(entity, cap);
+            syncAndSave(entity, cap);
         });
     }
 
-    private static void syncToPersistentData(LivingEntity entity, IMobTrait cap) {
-        CompoundTag nbt = entity.getPersistentData();
-        nbt.putInt(TAG_QUALITY, cap.getQuality());
-        nbt.putBoolean("IsBoss", cap.isBoss());
-        cap.getTraits().forEach(nbt::putInt);
+    private static void syncAndSave(LivingEntity entity, IMobTrait cap) {
+        CompoundTag persistent = entity.getPersistentData();
+        persistent.putInt(TAG_QUALITY, cap.getQuality());
+        persistent.putBoolean("IsBoss", cap.isBoss());
 
         CompoundTag syncTag = cap.serializeNBT();
-        EnhancedMonster.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), 
-            new PacketSyncMobTrait(entity.getId(), syncTag));
+        EnhancedMonster.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
+                new PacketSyncMobTrait(entity.getId(), syncTag));
     }
 
     private static void adjustHealth(LivingEntity entity, int quality) {
@@ -108,21 +105,19 @@ public class EffectAllocator {
 
         if (quality == 3) {
             double tier2Limit = ModConfig.TIER_2_LIMIT.get();
-            if (currentMax < tier2Limit) {
-                bonusHealth = tier2Limit - currentMax;
-            }
+            if (currentMax < tier2Limit) bonusHealth = tier2Limit - currentMax;
         } 
         else if (quality == 2) {
             double tier1Limit = ModConfig.TIER_1_LIMIT.get();
-            if (currentMax < tier1Limit) {
-                bonusHealth = tier1Limit - currentMax;
-            }
+            if (currentMax < tier1Limit) bonusHealth = tier1Limit - currentMax;
         }
 
         if (bonusHealth > 0) {
             var attribute = entity.getAttribute(Attributes.MAX_HEALTH);
             if (attribute != null) {
+                attribute.removeModifier(HEALTH_MODIFIER_UUID);
                 attribute.addPermanentModifier(new AttributeModifier(HEALTH_MODIFIER_UUID, "EM Health Bonus", bonusHealth, AttributeModifier.Operation.ADDITION));
+                
                 entity.setHealth(entity.getMaxHealth());
             }
         }
@@ -148,29 +143,20 @@ public class EffectAllocator {
     }
 
     private static void giveEffects(LivingEntity entity, int count, int quality, boolean isUndead, boolean shouldGlow, IMobTrait cap) {
-        List<EffectPools.EffectEntry> pool = EffectPools.getPool(quality, isBoss(entity));
-        Collections.shuffle(pool); 
+        List<EffectPools.EffectEntry> pool = new ArrayList<>(EffectPools.getPool(quality, isBoss(entity)));
+        Collections.shuffle(pool);
 
         int applied = 0;
-
         for (EffectPools.EffectEntry entry : pool) {
             if (applied >= count) break;
-            
-            String effectTag = entry.tagName;
-            int level = entry.level; 
 
-            // 检查当前准备添加的词条是否与已经添加的词条互斥
-            boolean incompatible = false;
-            for (String existingTrait : cap.getTraits().keySet()) {
-                if (isIncompatible(effectTag, existingTrait)) {
-                    incompatible = true;
-                    break;
-                }
-            }
-            if (incompatible) continue; 
+            String effectTag = entry.tagName;
+            int level = entry.level;
+
+            boolean incompatible = cap.getTraits().keySet().stream().anyMatch(existing -> isIncompatible(effectTag, existing));
+            if (incompatible) continue;
 
             cap.addTrait(effectTag, level);
-            
             applyImmediateAttributes(entity, effectTag, level);
             applied++;
         }
@@ -182,33 +168,21 @@ public class EffectAllocator {
 
     private static void applyImmediateAttributes(LivingEntity entity, String tag, int level) {
         if (tag.equals(POWERFUL)) {
-            var attr = entity.getAttribute(Attributes.ATTACK_DAMAGE);
-            if (attr != null) {
-                attr.addPermanentModifier(new AttributeModifier(DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 3.0, AttributeModifier.Operation.ADDITION));
-            }
+            safeApplyModifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 3.0, AttributeModifier.Operation.ADDITION);
+        } else if (tag.equals(SPEEDY)) {
+            safeApplyModifier(entity, Attributes.MOVEMENT_SPEED, SPEED_MODIFIER_UUID, "EM Speed Bonus", (level + 1) * 0.1, AttributeModifier.Operation.MULTIPLY_BASE);
+        } else if (tag.equals(TANKY)) {
+            safeApplyModifier(entity, Attributes.ARMOR, ARMOR_MODIFIER_UUID, "EM Armor Bonus", (level + 1) * 4.0, AttributeModifier.Operation.ADDITION);
+            safeApplyModifier(entity, Attributes.ARMOR_TOUGHNESS, TOUGHNESS_MODIFIER_UUID, "EM Toughness Bonus", (level + 1) * 2.0, AttributeModifier.Operation.ADDITION);
+            safeApplyModifier(entity, Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_MODIFIER_UUID, "EM Knockback Bonus", (level + 1) * 0.2, AttributeModifier.Operation.ADDITION);
         }
-        if (tag.equals(SPEEDY)) {
-            var attr = entity.getAttribute(Attributes.MOVEMENT_SPEED);
-            if (attr != null) {
-                attr.addPermanentModifier(new AttributeModifier(SPEED_MODIFIER_UUID, "EM Speed Bonus", (level + 1) * 0.1, AttributeModifier.Operation.MULTIPLY_BASE));
-            }
-        }
-        // --- 重甲 ---
-        if (tag.equals(TANKY)) {
-            var armor = entity.getAttribute(Attributes.ARMOR);
-            if (armor != null) {
-                armor.addPermanentModifier(new AttributeModifier(ARMOR_MODIFIER_UUID, "EM Armor Bonus", (level + 1) * 4.0, AttributeModifier.Operation.ADDITION));
-            }
-            
-            var toughness = entity.getAttribute(Attributes.ARMOR_TOUGHNESS);
-            if (toughness != null) {
-                toughness.addPermanentModifier(new AttributeModifier(TOUGHNESS_MODIFIER_UUID, "EM Toughness Bonus", (level + 1) * 2.0, AttributeModifier.Operation.ADDITION));
-            }
-            
-            var knockback = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-            if (knockback != null) {
-                knockback.addPermanentModifier(new AttributeModifier(KNOCKBACK_MODIFIER_UUID, "EM Knockback Bonus", (level + 1) * 0.2, AttributeModifier.Operation.ADDITION));
-            }
+    }
+
+    private static void safeApplyModifier(LivingEntity entity, net.minecraft.world.entity.ai.attributes.Attribute attrType, UUID uuid, String name, double value, AttributeModifier.Operation op) {
+        AttributeInstance instance = entity.getAttribute(attrType);
+        if (instance != null) {
+            instance.removeModifier(uuid);
+            instance.addPermanentModifier(new AttributeModifier(uuid, name, value, op));
         }
     }
 
@@ -227,22 +201,13 @@ public class EffectAllocator {
 
     private static boolean isBoss(LivingEntity entity) {
         var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
-        if (resourceLocation == null) return false;
-        return ModConfig.CACHED_BOSS_LIST.contains(resourceLocation.toString());
+        return resourceLocation != null && ModConfig.CACHED_BOSS_LIST.contains(resourceLocation.toString());
     }
 
-    // 定义互斥规则
     private static boolean isIncompatible(String trait1, String trait2) {
-        if (trait1.equals(trait2)) return true; 
-        
-        // 虚无 (VOID) 与 狂暴 (BERSERK)、强力 (POWERFUL) 互斥
-        if (trait1.equals(VOID)) {
-            return trait2.equals(BERSERK) || trait2.equals(POWERFUL);
-        }
-        if (trait1.equals(BERSERK) || trait1.equals(POWERFUL)) {
-            return trait2.equals(VOID);
-        }
-        
+        if (trait1.equals(trait2)) return true;
+        if (trait1.equals(VOID)) return trait2.equals(BERSERK) || trait2.equals(POWERFUL);
+        if (trait1.equals(BERSERK) || trait1.equals(POWERFUL)) return trait2.equals(VOID);
         return false;
     }
 }
