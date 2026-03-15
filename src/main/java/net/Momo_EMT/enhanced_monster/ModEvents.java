@@ -83,10 +83,10 @@ public class ModEvents {
     }
 
     private static float getBerserkVulnerabilityDamage(float baseDamage) {
-        if (baseDamage < 60.0f) {    
+        if (baseDamage < 100.0f) {    
             return baseDamage * 1.2f; 
         } else {
-            return baseDamage + 12.0f;
+            return baseDamage + 20.0f;
         }
     }
 
@@ -234,6 +234,16 @@ public class ModEvents {
                     attacker.heal(healAmount);
                     if (attacker.level() instanceof ServerLevel serverLevel) {
                         serverLevel.sendParticles(ParticleTypes.HEART, attacker.getX(), attacker.getY(0.5), attacker.getZ(), 5, 0.3, 0.3, 0.3, 0.0);
+                    }
+                }
+
+                // 新增：VOID (虚无) 效果
+                if (traits.containsKey(EffectAllocator.VOID)) {
+                    int level = traits.get(EffectAllocator.VOID) + 1;
+                    float voidExtraDamage = victim.getMaxHealth() * (level * 0.04f);
+                    event.setAmount(event.getAmount() + voidExtraDamage);
+                    if (attacker.level() instanceof ServerLevel serverLevel) {
+                        serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
                     }
                 }
 

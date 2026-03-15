@@ -38,6 +38,7 @@ public class EffectAllocator {
     public static final String BERSERK = NBT_PREFIX + "berserk";        // 狂暴
     public static final String LIFESTEAL = NBT_PREFIX + "lifesteal";    // 嗜血
     public static final String TANKY = NBT_PREFIX + "tanky";            // 重甲
+    public static final String VOID = NBT_PREFIX + "void";            // 虚无
 
     public static void apply(LivingEntity entity) {
         if (entity.level().isClientSide) return;
@@ -130,9 +131,9 @@ public class EffectAllocator {
     private static int rollQuality(int tier) {
         int roll = RANDOM.nextInt(1000);
         return switch (tier) {
-            case 1 -> (roll < 900) ? 1 : (roll < 995 ? 2 : 3);
-            case 2 -> (roll < 450) ? 1 : (roll < 950 ? 2 : 3);
-            default -> (roll < 50) ? 1 : (roll < 500 ? 2 : 3);
+            case 1 -> (roll < 900) ? 1 : (roll < 999 ? 2 : 3);
+            case 2 -> (roll < 200) ? 1 : (roll < 950 ? 2 : 3);
+            default -> (roll < 10) ? 1 : (roll < 340 ? 2 : 3);
         };
     }
 
@@ -157,6 +158,16 @@ public class EffectAllocator {
             
             String effectTag = entry.tagName;
             int level = entry.level; 
+
+            // 检查当前准备添加的词条是否与已经添加的词条互斥
+            boolean incompatible = false;
+            for (String existingTrait : cap.getTraits().keySet()) {
+                if (isIncompatible(effectTag, existingTrait)) {
+                    incompatible = true;
+                    break;
+                }
+            }
+            if (incompatible) continue; 
 
             cap.addTrait(effectTag, level);
             
@@ -218,5 +229,20 @@ public class EffectAllocator {
         var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         if (resourceLocation == null) return false;
         return ModConfig.CACHED_BOSS_LIST.contains(resourceLocation.toString());
+    }
+
+    // 定义互斥规则
+    private static boolean isIncompatible(String trait1, String trait2) {
+        if (trait1.equals(trait2)) return true; 
+        
+        // 虚无 (VOID) 与 狂暴 (BERSERK)、强力 (POWERFUL) 互斥
+        if (trait1.equals(VOID)) {
+            return trait2.equals(BERSERK) || trait2.equals(POWERFUL);
+        }
+        if (trait1.equals(BERSERK) || trait1.equals(POWERFUL)) {
+            return trait2.equals(VOID);
+        }
+        
+        return false;
     }
 }

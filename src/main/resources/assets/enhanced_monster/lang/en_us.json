@@ -9,5 +9,6 @@
   "trait.enhanced_monster.weakener": "Weakening",
   "trait.enhanced_monster.berserk": "Berserk",
   "trait.enhanced_monster.lifesteal": "Lifesteal",
-  "trait.enhanced_monster.tanky": "Tanky"
+  "trait.enhanced_monster.tanky": "Tanky",
+  "trait.enhanced_monster.void": "Void"
 }

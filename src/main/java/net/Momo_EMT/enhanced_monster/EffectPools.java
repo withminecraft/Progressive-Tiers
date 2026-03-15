@@ -24,13 +24,12 @@ public class EffectPools {
             addFixed(list, EffectAllocator.PROTECTED, 4); // 保护 V
             addFixed(list, EffectAllocator.POWERFUL, 5);  // 强力 VI
             addFixed(list, EffectAllocator.REGENERATING, 3);      // 再生 IV
-            addFixed(list, EffectAllocator.SPEEDY, 3);  // 神速 IV
-            addFixed(list, EffectAllocator.POISONOUS, 2);
             addFixed(list, EffectAllocator.STRAY, 2);
             addFixed(list, EffectAllocator.WEAKENER, 2);
             addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addFixed(list, EffectAllocator.TANKY, 4);
+            addFixed(list, EffectAllocator.VOID, 1);
             return list;
         }
 
@@ -67,6 +66,7 @@ public class EffectPools {
             addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addRand(list, EffectAllocator.TANKY, 3, 4);
+            addFixed(list, EffectAllocator.VOID, 0);
         }
         return list;
     }
