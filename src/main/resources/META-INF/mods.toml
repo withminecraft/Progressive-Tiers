@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="All rights reserved"
+
+[[mods]]
+modId="enhanced_monster" 
+version="1.8"
+displayName="Progressive Tiers" 
+authors="Momo_EMT"
+description='''
+Tiered Buff Modifiers for Hostile Creatures.
+'''
+
+[[dependencies.enhanced_monster]] 
+    modId="forge"
+    mandatory=true
+    versionRange="${forge_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.enhanced_monster]] 
+    modId="minecraft"
+    mandatory=true
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"
