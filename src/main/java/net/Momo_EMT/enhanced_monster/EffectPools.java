@@ -44,22 +44,24 @@ public class EffectPools {
             addFixed(list, EffectAllocator.STRAY, 0);
             addFixed(list, EffectAllocator.WEAKENER, 0);
             addFixed(list, EffectAllocator.TANKY, 0);
+            addFixed(list, EffectAllocator.SUMMONER, 0);
         } else if (quality == 2) { // 2级池
             addRand(list, EffectAllocator.PROTECTED, 2, 3);
             addRand(list, EffectAllocator.POWERFUL, 2, 3);
             addRand(list, EffectAllocator.REGENERATING, 1, 2);
-            addRand(list, EffectAllocator.SPEEDY, 1, 2);
+            addRand(list, EffectAllocator.SPEEDY, 2, 3);
             addRand(list, EffectAllocator.POISONOUS, 0, 1);
             addRand(list, EffectAllocator.STRAY, 0, 1);
             addRand(list, EffectAllocator.WEAKENER, 0, 1);
             addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addRand(list, EffectAllocator.TANKY, 1, 2);
+            addFixed(list, EffectAllocator.SUMMONER, 0);
         } else if (quality == 3) { // 3级池
             addRand(list, EffectAllocator.PROTECTED, 4, 5);
             addRand(list, EffectAllocator.POWERFUL, 4, 5);
             addRand(list, EffectAllocator.REGENERATING, 3, 4);
-            addRand(list, EffectAllocator.SPEEDY, 2, 3);
+            addRand(list, EffectAllocator.SPEEDY, 4, 5);
             addRand(list, EffectAllocator.POISONOUS, 1, 2);
             addRand(list, EffectAllocator.STRAY, 1, 2);
             addRand(list, EffectAllocator.WEAKENER, 1, 2);
@@ -67,6 +69,7 @@ public class EffectPools {
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addRand(list, EffectAllocator.TANKY, 3, 4);
             addFixed(list, EffectAllocator.VOID, 0);
+            addFixed(list, EffectAllocator.SUMMONER, 0);
         }
         return list;
     }

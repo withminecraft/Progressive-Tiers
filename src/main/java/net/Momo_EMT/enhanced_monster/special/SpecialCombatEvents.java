@@ -37,6 +37,38 @@ public class SpecialCombatEvents {
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onHuskAttack(LivingHurtEvent event) {
+        Entity attacker = event.getSource().getEntity();
+        LivingEntity target = event.getEntity();
+
+        if (attacker instanceof LivingEntity livingAttacker) {
+            
+            if (livingAttacker.getPersistentData().getBoolean(HuskSpecial.TAG_DROP_ANCIENT_LOOT)) {
+                
+                CataclysmCompat.spawnSandstorm(livingAttacker);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onSpiderAttack(LivingHurtEvent event) {
+        Entity attacker = event.getSource().getEntity();
+        LivingEntity target = event.getEntity();
+
+        if (attacker instanceof LivingEntity livingAttacker && 
+            livingAttacker.getPersistentData().getBoolean(SpiderSpecial.TAG_WEB_ATTACK)) {
+            
+            if (target != null && !target.level().isClientSide) {
+                // 在目标当前位置生成蜘蛛网
+                net.minecraft.core.BlockPos pos = target.blockPosition();
+                if (target.level().isEmptyBlock(pos)) {
+                    target.level().setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.COBWEB.defaultBlockState());
+                }
+            }
+        }
+    }
     
     @SubscribeEvent
     public static void onTridentJoinLevel(EntityJoinLevelEvent event) {
@@ -118,7 +150,7 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(EvokerSpecial.TAG_DROP_TOTEM)) {
-            int amount = 1;
+            int amount = 2;
             if (entity.level().random.nextFloat() < 0.5F) {
                 amount += 1;
             }
@@ -127,7 +159,7 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(VindicatorSpecial.TAG_DROP_EMERALD)) {
-            int amount = 1;
+            int amount = 4;
             if (entity.level().random.nextFloat() < 0.5F) {
                 amount += 1;
             }
@@ -173,7 +205,7 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(PiglinSpecial.TAG_DROP_GOLD)) {
-            int amount = 1;
+            int amount = 4;
             if (entity.level().random.nextFloat() < 0.5F) {
                 amount += 1;
             }
@@ -187,7 +219,7 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(ZombifiedPiglinSpecial.TAG_DROP_GOLD)) {
-            int amount = 1;
+            int amount = 3;
             if (entity.level().random.nextFloat() < 0.5F) {
                 amount += 1;
             }
@@ -201,12 +233,26 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(PillagerSpecial.TAG_DROP_EMERALD)) {
-            ItemStack emeraldBlock = new ItemStack(Items.EMERALD_BLOCK, 1);
+            ItemStack emeraldBlock = new ItemStack(Items.EMERALD_BLOCK, 4);
             event.getDrops().add(new ItemEntity(
                 entity.level(), 
                 entity.getX(), entity.getY(), entity.getZ(), 
                 emeraldBlock
             ));
+        }
+
+        if (entity.getPersistentData().getBoolean(HuskSpecial.TAG_DROP_ANCIENT_LOOT)) {
+            Item ancientMetal = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse("cataclysm:ancient_metal_ingot"));
+            if (ancientMetal != null) {
+                event.getDrops().add(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), 
+                    new ItemStack(ancientMetal, 3)));
+            }
+
+            Item kobolediatorSkull = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse("cataclysm:kobolediator_skull"));
+            if (kobolediatorSkull != null) {
+                event.getDrops().add(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), 
+                    new ItemStack(kobolediatorSkull, 1)));
+            }
         }
     }
 }

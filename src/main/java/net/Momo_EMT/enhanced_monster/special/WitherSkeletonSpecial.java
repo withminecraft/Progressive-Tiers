@@ -1,11 +1,13 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.advancements.Advancement;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -35,10 +37,10 @@ public class WitherSkeletonSpecial implements ISpecialElite {
     }
 
     private void applyNetheriteTier(WitherSkeleton wither) {
-        wither.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.NETHERITE_HELMET));
-        wither.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.NETHERITE_CHESTPLATE));
-        wither.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.NETHERITE_LEGGINGS));
-        wither.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.NETHERITE_BOOTS));
+        wither.setItemSlot(EquipmentSlot.HEAD, createTrimmedArmor(Items.NETHERITE_HELMET));
+        wither.setItemSlot(EquipmentSlot.CHEST, createTrimmedArmor(Items.NETHERITE_CHESTPLATE));
+        wither.setItemSlot(EquipmentSlot.LEGS, createTrimmedArmor(Items.NETHERITE_LEGGINGS));
+        wither.setItemSlot(EquipmentSlot.FEET, createTrimmedArmor(Items.NETHERITE_BOOTS));
         wither.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
     }
 
@@ -50,6 +52,18 @@ public class WitherSkeletonSpecial implements ISpecialElite {
         wither.setItemSlot(EquipmentSlot.MAINHAND, getModItem("cataclysm:the_incinerator"));
         
         wither.getPersistentData().putBoolean(TAG_DROP_IGNITIUM, true);
+    }
+
+    private ItemStack createTrimmedArmor(Item item) {
+        ItemStack stack = new ItemStack(item);
+        if (item instanceof ArmorItem) {
+            CompoundTag nbt = stack.getOrCreateTag();
+            CompoundTag trimTag = new CompoundTag();
+            trimTag.putString("pattern", "minecraft:rib");
+            trimTag.putString("material", "minecraft:diamond");
+            nbt.put("Trim", trimTag);
+        }
+        return stack;
     }
 
     private boolean isIgnisDefeated(LivingEntity entity) {

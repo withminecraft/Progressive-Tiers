@@ -1,8 +1,10 @@
 package net.Momo_EMT.enhanced_monster.special;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -30,7 +32,22 @@ public class PiglinBruteSpecial implements ISpecialElite {
 
     private void equipArmor(PiglinBrute brute, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);
+        
+        applySnoutGoldTrim(stack);
+        
         brute.setItemSlot(slot, stack);
         brute.setDropChance(slot, 0.0F);
+    }
+
+    private void applySnoutGoldTrim(ItemStack stack) {
+        if (!(stack.getItem() instanceof ArmorItem)) return;
+
+        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag trimTag = new CompoundTag();
+
+        trimTag.putString("pattern", "minecraft:snout");
+        trimTag.putString("material", "minecraft:gold");
+
+        nbt.put("Trim", trimTag);
     }
 }

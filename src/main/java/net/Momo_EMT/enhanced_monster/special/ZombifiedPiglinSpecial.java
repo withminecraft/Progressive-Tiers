@@ -1,8 +1,10 @@
 package net.Momo_EMT.enhanced_monster.special;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -32,8 +34,23 @@ public class ZombifiedPiglinSpecial implements ISpecialElite {
 
     private void equipGoldArmor(ZombifiedPiglin zPiglin, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);
-        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
+        stack.enchant(Enchantments.PROJECTILE_PROTECTION, 4);
+        
+        applySnoutLapisTrim(stack);
+        
         zPiglin.setItemSlot(slot, stack);
         zPiglin.setDropChance(slot, 0.0F);
+    }
+
+    private void applySnoutLapisTrim(ItemStack stack) {
+        if (!(stack.getItem() instanceof ArmorItem)) return;
+
+        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag trimTag = new CompoundTag();
+
+        trimTag.putString("pattern", "minecraft:snout");
+        trimTag.putString("material", "minecraft:lapis");
+
+        nbt.put("Trim", trimTag);
     }
 }

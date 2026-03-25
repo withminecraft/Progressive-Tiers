@@ -1,8 +1,11 @@
 package net.Momo_EMT.enhanced_monster.special;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -32,7 +35,20 @@ public class DrownedSpecial implements ISpecialElite {
     private void equipArmor(Drowned drowned, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.THORNS, 3);
+        applyCoastCopperTrim(stack);
         drowned.setItemSlot(slot, stack);
         drowned.setDropChance(slot, 0.0F);
+    }
+
+    private void applyCoastCopperTrim(ItemStack stack) {
+        if (!(stack.getItem() instanceof ArmorItem)) return;
+
+        CompoundTag nbt = stack.getOrCreateTag();
+        CompoundTag trimTag = new CompoundTag();
+
+        trimTag.putString("pattern", "minecraft:coast");
+        trimTag.putString("material", "minecraft:copper");
+
+        nbt.put("Trim", trimTag);
     }
 }

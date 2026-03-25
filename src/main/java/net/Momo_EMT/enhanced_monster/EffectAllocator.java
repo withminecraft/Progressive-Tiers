@@ -39,9 +39,16 @@ public class EffectAllocator {
     public static final String LIFESTEAL = NBT_PREFIX + "lifesteal";
     public static final String TANKY = NBT_PREFIX + "tanky";
     public static final String VOID = NBT_PREFIX + "void";
+    public static final String SUMMONER = NBT_PREFIX + "summoner";
 
     public static void apply(LivingEntity entity) {
         if (entity.level().isClientSide) return;
+        if (entity.getPersistentData().contains("EM_SkipAllocation")) return;
+
+        String dimensionId = entity.level().dimension().location().toString();
+        if (ModConfig.CACHED_DIMENSION_BLACKLIST.contains(dimensionId)) {
+            return; 
+        }
 
         var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         if (resourceLocation == null) return;
@@ -99,29 +106,30 @@ public class EffectAllocator {
                 new PacketSyncMobTrait(entity.getId(), syncTag));
     }
 
-    private static void adjustHealth(LivingEntity entity, int quality) {
+private static void adjustHealth(LivingEntity entity, int quality) {
         if (isBoss(entity)) return;
 
-        double currentMax = entity.getMaxHealth();
+        var attribute = entity.getAttribute(Attributes.MAX_HEALTH);
+        if (attribute == null) return;
+
+        attribute.removeModifier(HEALTH_MODIFIER_UUID);
+
+        double cleanMax = attribute.getValue(); 
         double bonusHealth = 0;
 
         if (quality == 3) {
             double tier2Limit = ModConfig.TIER_2_LIMIT.get();
-            if (currentMax < tier2Limit) bonusHealth = tier2Limit - currentMax;
+            if (cleanMax < tier2Limit) bonusHealth = tier2Limit - cleanMax;
         } 
         else if (quality == 2) {
             double tier1Limit = ModConfig.TIER_1_LIMIT.get();
-            if (currentMax < tier1Limit) bonusHealth = tier1Limit - currentMax;
+            if (cleanMax < tier1Limit) bonusHealth = tier1Limit - cleanMax;
         }
 
         if (bonusHealth > 0) {
-            var attribute = entity.getAttribute(Attributes.MAX_HEALTH);
-            if (attribute != null) {
-                attribute.removeModifier(HEALTH_MODIFIER_UUID);
-                attribute.addPermanentModifier(new AttributeModifier(HEALTH_MODIFIER_UUID, "EM Health Bonus", bonusHealth, AttributeModifier.Operation.ADDITION));
-                
-                entity.setHealth(entity.getMaxHealth());
-            }
+            attribute.addPermanentModifier(new AttributeModifier(HEALTH_MODIFIER_UUID, "EM Health Bonus", bonusHealth, AttributeModifier.Operation.ADDITION));
+            
+            entity.setHealth(entity.getMaxHealth());
         }
     }
 
@@ -189,6 +197,18 @@ public class EffectAllocator {
     }
 
     private static boolean isAllowed(LivingEntity entity) {
+        Class<?> entityClass = entity.getClass();
+        String className = entityClass.getName();
+        
+        // 针对 Goety 模组的包名拦截逻辑
+        if (className.startsWith("com.Polarice3.Goety.common.entities.")) {
+            if (className.startsWith("com.Polarice3.Goety.common.entities.ally.") || 
+                className.startsWith("com.Polarice3.Goety.common.entities.neutral.") || 
+                className.startsWith("com.Polarice3.Goety.common.entities.hostile.servants.")) {
+                return false;
+            }
+        }
+
         var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         if (resourceLocation == null) return false;
 

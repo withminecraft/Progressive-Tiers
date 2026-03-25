@@ -30,10 +30,12 @@ public class ModConfig {
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> QUALITY_2_EXTRA_DROPS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> QUALITY_3_EXTRA_DROPS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> BOSS_EXTRA_DROPS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> DIMENSION_BLACKLIST;
 
     public static final Set<String> CACHED_BLACKLIST = new HashSet<>();
     public static final Set<String> CACHED_WHITELIST = new HashSet<>();
     public static final Set<String> CACHED_BOSS_LIST = new HashSet<>();
+    public static final Set<String> CACHED_DIMENSION_BLACKLIST = new HashSet<>();
 
     static {
         BUILDER.push("General Settings");
@@ -46,7 +48,20 @@ public class ModConfig {
         BLACKLIST = BUILDER.comment(
                 "黑名单：填入实体ID（如 minecraft:zombie）或 ModID（如 alexsmobs）。这些生物不会成为精英怪。",
                 "Blacklist: Enter Entity IDs (e.g., minecraft:zombie) or Mod IDs (e.g., alexsmobs). These mobs will not become Elites."
-        ).defineList("blacklist", List.of("minecraft:slime", "minecraft:silverfish", "minecraft:vex", "minecraft:ghast", "minecraft:magma_cube", "minecraft:endermite", "cataclysm:endermaptera", "cataclysm:lionfish", "cataclysm:urchinkin", "cataclysm:symbiocto"), obj -> obj instanceof String);
+        ).defineList("blacklist", List.of("minecraft:slime", "minecraft:silverfish", "minecraft:vex", "minecraft:ghast", "minecraft:magma_cube", "minecraft:endermite", "cataclysm:endermaptera", "cataclysm:lionfish", "cataclysm:urchinkin", 
+        "cataclysm:symbiocto", "irons_spellbooks:summoned_vex", "irons_spellbooks:summoned_zombie", "irons_spellbooks:summoned_skeleton", "irons_spellbooks:summoned_polar_bear", "irons_spellbooks:summoned_sword", 
+        "irons_spellbooks:summoned_claymore", "irons_spellbooks:summoned_rapier", "mowziesmobs:foliaath", "mowziesmobs:umvuthana_raptor", "mowziesmobs:umvuthana_crane", "mowziesmobs:umvuthana", "mowziesmobs:umvuthana_follower_raptor", 
+        "illageandspillage:hinder", "illageandspillage:chagrin_sentry", "illageandspillage:factory", "illageandspillage:poker", "illageandspillage:sniper", "illageandspillage:beeper", "illageandspillage:funnybone", 
+        "illageandspillage:eyesore", "illageandspillage:dispenser", "illageandspillage:faker", "illageandspillage:kaboomer", "illageandspillage:crashager", "illageandspillage:imp", "illageandspillage:illashooter", 
+        "illageandspillage:mob_spirit", "illageandspillage:spirit_hand", "illageandspillage:illager_soul", "illageandspillage:trick_or_treat", "illageandspillage:freakager", "alexscaves:ferrouslime", "alexscaves:notor", 
+        "alexscaves:gammaroach", "alexscaves:caramel_cube", "alexscaves:vesper", "alexscaves:gingerbread_man", "goety:irk", "goety:hostile_black_wolf", "goety:tormentor", "revelationfix:apostle_servant", "revelationfix:heretic_servant", 
+        "revelationfix:maverick_servant", "revelationfix:wither_servant", "revelationfix:phantom_servant", "alexsmobs:skreecher", "alexsmobs:murmur_head", "alexsmobs:crimson_mosquito", "alexsmobs:enderiophage", 
+        "legendary_monsters:spiky_bug"), obj -> obj instanceof String);
+
+        DIMENSION_BLACKLIST = BUILDER.comment(
+                "维度黑名单：填入维度ID（如 minecraft:the_nether）。在这些维度生成的生物不会被强化。",
+                "Dimension Blacklist: Enter Dimension IDs (e.g., minecraft:the_nether). Mobs in these dimensions will not be enhanced."
+        ).defineList("dimension_blacklist", Collections.emptyList(), obj -> obj instanceof String);
 
         WHITELIST = BUILDER.comment(
                 "白名单：仅在此名单内的生物生效。",
@@ -56,7 +71,10 @@ public class ModConfig {
         BOSS_LIST = BUILDER.comment(
                 "BOSS名单：百分百获得5个高级效果并发光。",
                 "Boss List: Entities in this list will always receive 5 high-tier effects and the Glowing effect."
-        ).defineList("boss_list", List.of("minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", "cataclysm:the_leviathan", "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla"), obj -> obj instanceof String);
+        ).defineList("boss_list", List.of("minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", "cataclysm:the_leviathan", 
+        "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "mowziesmobs:ferrous_wroughtnaut", "mowziesmobs:frostmaw", "mowziesmobs:umvuthi", 
+        "illageandspillage:magispeller", "illageandspillage:spiritcaller", "illageandspillage:ragno", "goety:apostle", "goety:vizier", "goety:hostile_redstone_monstrosity", "goety:ender_keeper", "revelationfix:apollyon", 
+        "aquamirae:captain_cornelia", "alexscaves:luxtructosaurus", "alexsmobs:void_worm", "legendary_monsters:cloud_golem", "legendary_monsters:the_obliterator"), obj -> obj instanceof String);
 
         TIER_1_LIMIT = BUILDER.comment(
                 "第一梯度上限血量（默认40）。血量超过此值的生物将被视为第二梯度。",
@@ -91,7 +109,7 @@ public class ModConfig {
                 .defineList("quality_2_extra_drops", Collections.emptyList(), obj -> obj instanceof String);
 
         QUALITY_3_EXTRA_DROPS = BUILDER.comment("品级3 (Quality 3) 的额外掉落列表。", dropExample, dropExampleEn)
-                .defineList("quality_3_extra_drops", List.of("minecraft:gold_ingot,2,5,0.8"), obj -> obj instanceof String);
+                .defineList("quality_3_extra_drops", List.of("minecraft:golden_apple,2,3,0.8"), obj -> obj instanceof String);
 
         BOSS_EXTRA_DROPS = BUILDER.comment("BOSS 品级的额外掉落列表。", dropExample, dropExampleEn)
                 .defineList("boss_extra_drops", List.of("minecraft:netherite_scrap,1,1,1.0", "minecraft:diamond,2,5,0.8"), obj -> obj instanceof String);
@@ -111,6 +129,9 @@ public class ModConfig {
 
         CACHED_BOSS_LIST.clear();
         CACHED_BOSS_LIST.addAll(BOSS_LIST.get());
+
+        CACHED_DIMENSION_BLACKLIST.clear();
+        CACHED_DIMENSION_BLACKLIST.addAll(DIMENSION_BLACKLIST.get());
     }
 
     @SubscribeEvent
