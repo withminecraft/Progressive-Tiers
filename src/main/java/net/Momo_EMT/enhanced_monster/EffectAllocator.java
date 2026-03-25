@@ -44,6 +44,7 @@ public class EffectAllocator {
     public static void apply(LivingEntity entity) {
         if (entity.level().isClientSide) return;
         if (entity.getPersistentData().contains("EM_SkipAllocation")) return;
+        if (entity.getMaxHealth() < 16.0) return;
 
         String dimensionId = entity.level().dimension().location().toString();
         if (ModConfig.CACHED_DIMENSION_BLACKLIST.contains(dimensionId)) {

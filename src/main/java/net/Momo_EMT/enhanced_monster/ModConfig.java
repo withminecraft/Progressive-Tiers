@@ -48,15 +48,11 @@ public class ModConfig {
         BLACKLIST = BUILDER.comment(
                 "黑名单：填入实体ID（如 minecraft:zombie）或 ModID（如 alexsmobs）。这些生物不会成为精英怪。",
                 "Blacklist: Enter Entity IDs (e.g., minecraft:zombie) or Mod IDs (e.g., alexsmobs). These mobs will not become Elites."
-        ).defineList("blacklist", List.of("minecraft:slime", "minecraft:silverfish", "minecraft:vex", "minecraft:ghast", "minecraft:magma_cube", "minecraft:endermite", "cataclysm:endermaptera", "cataclysm:lionfish", "cataclysm:urchinkin", 
-        "cataclysm:symbiocto", "irons_spellbooks:summoned_vex", "irons_spellbooks:summoned_zombie", "irons_spellbooks:summoned_skeleton", "irons_spellbooks:summoned_polar_bear", "irons_spellbooks:summoned_sword", 
-        "irons_spellbooks:summoned_claymore", "irons_spellbooks:summoned_rapier", "mowziesmobs:foliaath", "mowziesmobs:umvuthana_raptor", "mowziesmobs:umvuthana_crane", "mowziesmobs:umvuthana", "mowziesmobs:umvuthana_follower_raptor", 
-        "illageandspillage:hinder", "illageandspillage:chagrin_sentry", "illageandspillage:factory", "illageandspillage:poker", "illageandspillage:sniper", "illageandspillage:beeper", "illageandspillage:funnybone", 
-        "illageandspillage:eyesore", "illageandspillage:dispenser", "illageandspillage:faker", "illageandspillage:kaboomer", "illageandspillage:crashager", "illageandspillage:imp", "illageandspillage:illashooter", 
-        "illageandspillage:mob_spirit", "illageandspillage:spirit_hand", "illageandspillage:illager_soul", "illageandspillage:trick_or_treat", "illageandspillage:freakager", "alexscaves:ferrouslime", "alexscaves:notor", 
-        "alexscaves:gammaroach", "alexscaves:caramel_cube", "alexscaves:vesper", "alexscaves:gingerbread_man", "goety:irk", "goety:hostile_black_wolf", "goety:tormentor", "revelationfix:apostle_servant", "revelationfix:heretic_servant", 
-        "revelationfix:maverick_servant", "revelationfix:wither_servant", "revelationfix:phantom_servant", "alexsmobs:skreecher", "alexsmobs:murmur_head", "alexsmobs:crimson_mosquito", "alexsmobs:enderiophage", 
-        "legendary_monsters:spiky_bug"), obj -> obj instanceof String);
+        ).defineList("blacklist", List.of("cataclysm:symbiocto", "irons_spellbooks:summoned_zombie", "irons_spellbooks:summoned_skeleton", "irons_spellbooks:summoned_polar_bear", "irons_spellbooks:summoned_sword", 
+        "irons_spellbooks:summoned_claymore", "irons_spellbooks:summoned_rapier", "illageandspillage:hinder", "illageandspillage:chagrin_sentry", "illageandspillage:factory", "illageandspillage:dispenser", 
+        "illageandspillage:faker", "illageandspillage:kaboomer", "illageandspillage:crashager", "illageandspillage:imp", "illageandspillage:spirit_hand", "illageandspillage:illager_soul", 
+        "illageandspillage:freakager", "goety:tormentor", "revelationfix:apostle_servant", "revelationfix:heretic_servant", "revelationfix:maverick_servant", "revelationfix:wither_servant", 
+        "revelationfix:phantom_servant", "alexsmobs:enderiophage"), obj -> obj instanceof String);
 
         DIMENSION_BLACKLIST = BUILDER.comment(
                 "维度黑名单：填入维度ID（如 minecraft:the_nether）。在这些维度生成的生物不会被强化。",
@@ -112,7 +108,7 @@ public class ModConfig {
                 .defineList("quality_3_extra_drops", List.of("minecraft:golden_apple,2,3,0.8"), obj -> obj instanceof String);
 
         BOSS_EXTRA_DROPS = BUILDER.comment("BOSS 品级的额外掉落列表。", dropExample, dropExampleEn)
-                .defineList("boss_extra_drops", List.of("minecraft:netherite_scrap,1,1,1.0", "minecraft:diamond,2,5,0.8"), obj -> obj instanceof String);
+                .defineList("boss_extra_drops", List.of("minecraft:netherite_scrap,1,2,1.0", "minecraft:diamond,4,9,0.8"), obj -> obj instanceof String);
         BUILDER.pop();
 
         BUILDER.pop();
