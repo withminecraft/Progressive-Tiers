@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Mod.EventBusSubscriber(modid = "enhanced_monster", bus = Mod.EventBusSubscriber.Bus.MOD)
+@Mod.EventBusSubscriber(modid = "enhanced_monster", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModConfig {
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
@@ -48,11 +48,11 @@ public class ModConfig {
         BLACKLIST = BUILDER.comment(
                 "黑名单：填入实体ID（如 minecraft:zombie）或 ModID（如 alexsmobs）。这些生物不会成为精英怪。",
                 "Blacklist: Enter Entity IDs (e.g., minecraft:zombie) or Mod IDs (e.g., alexsmobs). These mobs will not become Elites."
-        ).defineList("blacklist", List.of("cataclysm:symbiocto", "irons_spellbooks:summoned_zombie", "irons_spellbooks:summoned_skeleton", "irons_spellbooks:summoned_polar_bear", "irons_spellbooks:summoned_sword", 
-        "irons_spellbooks:summoned_claymore", "irons_spellbooks:summoned_rapier", "illageandspillage:hinder", "illageandspillage:chagrin_sentry", "illageandspillage:factory", "illageandspillage:dispenser", 
-        "illageandspillage:faker", "illageandspillage:kaboomer", "illageandspillage:crashager", "illageandspillage:imp", "illageandspillage:spirit_hand", "illageandspillage:illager_soul", 
-        "illageandspillage:freakager", "goety:tormentor", "revelationfix:apostle_servant", "revelationfix:heretic_servant", "revelationfix:maverick_servant", "revelationfix:wither_servant", 
-        "revelationfix:phantom_servant", "alexsmobs:enderiophage"), obj -> obj instanceof String);
+        ).defineList("blacklist", List.of("cataclysm:symbiocto", "irons_spellbooks:summoned_zombie", "irons_spellbooks:summoned_skeleton", "irons_spellbooks:summoned_polar_bear", 
+        "irons_spellbooks:summoned_sword", "irons_spellbooks:summoned_claymore", "irons_spellbooks:summoned_rapier", "illageandspillage:hinder", "illageandspillage:chagrin_sentry", 
+        "illageandspillage:factory", "illageandspillage:faker", "illageandspillage:kaboomer", "illageandspillage:crashager", "illageandspillage:mob_spirit", "illageandspillage:imp", 
+        "illageandspillage:spirit_hand", "illageandspillage:illager_soul", "illageandspillage:freakager", "goety:tormentor", "revelationfix:apostle_servant", "revelationfix:heretic_servant", 
+        "revelationfix:maverick_servant", "revelationfix:wither_servant", "revelationfix:phantom_servant", "alexsmobs:murmur_head", "alexsmobs:enderiophage"), obj -> obj instanceof String);
 
         DIMENSION_BLACKLIST = BUILDER.comment(
                 "维度黑名单：填入维度ID（如 minecraft:the_nether）。在这些维度生成的生物不会被强化。",
@@ -67,10 +67,11 @@ public class ModConfig {
         BOSS_LIST = BUILDER.comment(
                 "BOSS名单：百分百获得5个高级效果并发光。",
                 "Boss List: Entities in this list will always receive 5 high-tier effects and the Glowing effect."
-        ).defineList("boss_list", List.of("minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", "cataclysm:the_leviathan", 
-        "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "mowziesmobs:ferrous_wroughtnaut", "mowziesmobs:frostmaw", "mowziesmobs:umvuthi", 
-        "illageandspillage:magispeller", "illageandspillage:spiritcaller", "illageandspillage:ragno", "goety:apostle", "goety:vizier", "goety:hostile_redstone_monstrosity", "goety:ender_keeper", "revelationfix:apollyon", 
-        "aquamirae:captain_cornelia", "alexscaves:luxtructosaurus", "alexsmobs:void_worm", "legendary_monsters:cloud_golem", "legendary_monsters:the_obliterator"), obj -> obj instanceof String);
+        ).defineList("boss_list", List.of("minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", 
+        "cataclysm:the_leviathan", "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "irons_spellbooks:fire_boss", "mowziesmobs:ferrous_wroughtnaut", 
+        "mowziesmobs:frostmaw", "mowziesmobs:umvuthi", "illageandspillage:magispeller", "illageandspillage:spiritcaller", "illageandspillage:ragno", "goety:apostle", "goety:vizier", 
+        "goety:hostile_redstone_monstrosity", "goety:ender_keeper", "revelationfix:apollyon", "aquamirae:captain_cornelia", "alexscaves:luxtructosaurus", "alexsmobs:void_worm", "legendary_monsters:cloud_golem", 
+        "legendary_monsters:the_obliterator"), obj -> obj instanceof String);
 
         TIER_1_LIMIT = BUILDER.comment(
                 "第一梯度上限血量（默认40）。血量超过此值的生物将被视为第二梯度。",

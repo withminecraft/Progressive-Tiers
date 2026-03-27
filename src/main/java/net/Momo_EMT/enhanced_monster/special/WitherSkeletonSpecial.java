@@ -11,6 +11,7 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -22,40 +23,43 @@ public class WitherSkeletonSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof WitherSkeleton wither)) return;
 
-        wither.setCanPickUpLoot(false);
-
         if (isIgnisDefeated(wither)) {
             applyCataclysmTier(wither);
         } else {
             applyNetheriteTier(wither);
         }
 
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            wither.setDropChance(slot, 0.0F);
-        }
         wither.getPersistentData().putBoolean(TAG_DROP_SKULL, true);
     }
 
     private void applyNetheriteTier(WitherSkeleton wither) {
-        wither.setItemSlot(EquipmentSlot.HEAD, createTrimmedArmor(Items.NETHERITE_HELMET));
-        wither.setItemSlot(EquipmentSlot.CHEST, createTrimmedArmor(Items.NETHERITE_CHESTPLATE));
-        wither.setItemSlot(EquipmentSlot.LEGS, createTrimmedArmor(Items.NETHERITE_LEGGINGS));
-        wither.setItemSlot(EquipmentSlot.FEET, createTrimmedArmor(Items.NETHERITE_BOOTS));
-        wither.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
+        wither.setItemSlot(EquipmentSlot.HEAD, createEliteArmor(Items.NETHERITE_HELMET));
+        wither.setItemSlot(EquipmentSlot.CHEST, createEliteArmor(Items.NETHERITE_CHESTPLATE));
+        wither.setItemSlot(EquipmentSlot.LEGS, createEliteArmor(Items.NETHERITE_LEGGINGS));
+        wither.setItemSlot(EquipmentSlot.FEET, createEliteArmor(Items.NETHERITE_BOOTS));
+        
+        ItemStack sword = new ItemStack(Items.NETHERITE_SWORD);
+        applyEliteWeaponMods(sword);
+        wither.setItemSlot(EquipmentSlot.MAINHAND, sword);
     }
 
     private void applyCataclysmTier(WitherSkeleton wither) {
-        wither.setItemSlot(EquipmentSlot.HEAD, getModItem("cataclysm:ignitium_helmet"));
-        wither.setItemSlot(EquipmentSlot.CHEST, getModItem("cataclysm:ignitium_chestplate"));
-        wither.setItemSlot(EquipmentSlot.LEGS, getModItem("cataclysm:ignitium_leggings"));
-        wither.setItemSlot(EquipmentSlot.FEET, getModItem("cataclysm:ignitium_boots"));
-        wither.setItemSlot(EquipmentSlot.MAINHAND, getModItem("cataclysm:the_incinerator"));
+        wither.setItemSlot(EquipmentSlot.HEAD, createEliteModArmor("cataclysm:ignitium_helmet"));
+        wither.setItemSlot(EquipmentSlot.CHEST, createEliteModArmor("cataclysm:ignitium_chestplate"));
+        wither.setItemSlot(EquipmentSlot.LEGS, createEliteModArmor("cataclysm:ignitium_leggings"));
+        wither.setItemSlot(EquipmentSlot.FEET, createEliteModArmor("cataclysm:ignitium_boots"));
+        
+        ItemStack weapon = getModItem("cataclysm:the_incinerator");
+        applyEliteWeaponMods(weapon);
+        wither.setItemSlot(EquipmentSlot.MAINHAND, weapon);
         
         wither.getPersistentData().putBoolean(TAG_DROP_IGNITIUM, true);
     }
 
-    private ItemStack createTrimmedArmor(Item item) {
+    private ItemStack createEliteArmor(Item item) {
         ItemStack stack = new ItemStack(item);
+        applyEliteStatus(stack);
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
         if (item instanceof ArmorItem) {
             CompoundTag nbt = stack.getOrCreateTag();
             CompoundTag trimTag = new CompoundTag();
@@ -64,6 +68,25 @@ public class WitherSkeletonSpecial implements ISpecialElite {
             nbt.put("Trim", trimTag);
         }
         return stack;
+    }
+
+    private ItemStack createEliteModArmor(String registryName) {
+        ItemStack stack = getModItem(registryName);
+        applyEliteStatus(stack);
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+        return stack;
+    }
+
+    private void applyEliteWeaponMods(ItemStack stack) {
+        applyEliteStatus(stack);
+        stack.enchant(Enchantments.SHARPNESS, 3);
+    }
+
+    private void applyEliteStatus(ItemStack stack) {
+        if (stack.isEmpty()) return;
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
     }
 
     private boolean isIgnisDefeated(LivingEntity entity) {

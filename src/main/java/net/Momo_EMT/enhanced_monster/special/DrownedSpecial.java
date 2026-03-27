@@ -1,7 +1,6 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
@@ -17,27 +16,31 @@ public class DrownedSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof Drowned drowned)) return;
 
-        drowned.setCanPickUpLoot(false);
-
         equipArmor(drowned, EquipmentSlot.HEAD, Items.DIAMOND_HELMET);
         equipArmor(drowned, EquipmentSlot.CHEST, Items.DIAMOND_CHESTPLATE);
         equipArmor(drowned, EquipmentSlot.LEGS, Items.DIAMOND_LEGGINGS);
         equipArmor(drowned, EquipmentSlot.FEET, Items.DIAMOND_BOOTS);
 
         ItemStack trident = new ItemStack(Items.TRIDENT);
-        trident.enchant(Enchantments.CHANNELING, 1);
+        trident.enchant(Enchantments.VANISHING_CURSE, 1);
+        trident.enchant(Enchantments.BINDING_CURSE, 1);
+        trident.getOrCreateTag().putBoolean("Unbreakable", true);
+        
         drowned.setItemSlot(EquipmentSlot.MAINHAND, trident);
 
-        drowned.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         drowned.getPersistentData().putBoolean(TAG_DROP_TRIDENT, true);
     }
 
     private void equipArmor(Drowned drowned, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);
-        stack.enchant(Enchantments.THORNS, 3);
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
+        
         applyCoastCopperTrim(stack);
         drowned.setItemSlot(slot, stack);
-        drowned.setDropChance(slot, 0.0F);
     }
 
     private void applyCoastCopperTrim(ItemStack stack) {

@@ -16,8 +16,6 @@ public class PiglinSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof Piglin piglin)) return;
 
-        piglin.setCanPickUpLoot(false);
-
         equipGoldArmor(piglin, EquipmentSlot.HEAD, Items.GOLDEN_HELMET);
         equipGoldArmor(piglin, EquipmentSlot.CHEST, Items.GOLDEN_CHESTPLATE);
         equipGoldArmor(piglin, EquipmentSlot.LEGS, Items.GOLDEN_LEGGINGS);
@@ -25,17 +23,22 @@ public class PiglinSpecial implements ISpecialElite {
 
         if (piglin.level().random.nextFloat() < 0.5F) {
             ItemStack sword = new ItemStack(Items.GOLDEN_SWORD);
-            sword.enchant(Enchantments.SHARPNESS, 5);
-            sword.enchant(Enchantments.FIRE_ASPECT, 2);
+            sword.enchant(Enchantments.SHARPNESS, 7);
+            sword.enchant(Enchantments.FIRE_ASPECT, 3);
+            
+            applyEliteStatus(sword);
+            
             piglin.setItemSlot(EquipmentSlot.MAINHAND, sword);
         } else {
             ItemStack crossbow = new ItemStack(Items.CROSSBOW);
             crossbow.enchant(Enchantments.QUICK_CHARGE, 3);
-            crossbow.enchant(Enchantments.MULTISHOT, 1);
+            crossbow.enchant(Enchantments.PIERCING, 4);
+            
+            applyEliteStatus(crossbow);
+            
             piglin.setItemSlot(EquipmentSlot.MAINHAND, crossbow);
         }
 
-        piglin.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         piglin.getPersistentData().putBoolean(TAG_DROP_GOLD, true);
     }
 
@@ -43,10 +46,17 @@ public class PiglinSpecial implements ISpecialElite {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         
+        applyEliteStatus(stack);
+        
         applySnoutNetheriteTrim(stack);
         
         piglin.setItemSlot(slot, stack);
-        piglin.setDropChance(slot, 0.0F);
+    }
+
+    private void applyEliteStatus(ItemStack stack) {
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
     }
 
     private void applySnoutNetheriteTrim(ItemStack stack) {

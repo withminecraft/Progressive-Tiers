@@ -19,8 +19,6 @@ public class ZombieSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof Zombie zombie)) return;
 
-        zombie.setCanPickUpLoot(false);
-
         ZombieHorse horse = EntityType.ZOMBIE_HORSE.create(zombie.level());
         if (horse != null) {
             horse.moveTo(zombie.getX(), zombie.getY(), zombie.getZ(), zombie.getYRot(), zombie.getXRot());
@@ -50,18 +48,24 @@ public class ZombieSpecial implements ISpecialElite {
         ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
         sword.enchant(Enchantments.KNOCKBACK, 2);
         sword.enchant(Enchantments.FIRE_ASPECT, 2);
+        sword.enchant(Enchantments.SHARPNESS, 3);
+        sword.enchant(Enchantments.VANISHING_CURSE, 1);
+        sword.enchant(Enchantments.BINDING_CURSE, 1);
+        sword.getOrCreateTag().putBoolean("Unbreakable", true);
+        
         zombie.setItemSlot(EquipmentSlot.MAINHAND, sword);
-        zombie.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
     }
 
     private void equip(Zombie zombie, EquipmentSlot slot, net.minecraft.world.item.Item item, int dummy) {
         ItemStack stack = new ItemStack(item);
-        stack.enchant(Enchantments.THORNS, 3);
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
         
         applyWildAmethystTrim(stack);
         
         zombie.setItemSlot(slot, stack);
-        zombie.setDropChance(slot, 0.0F); 
     }
 
     private void applyWildAmethystTrim(ItemStack stack) {

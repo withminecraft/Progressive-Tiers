@@ -16,6 +16,10 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,19 +42,28 @@ public class SpecialCombatEvents {
         }
     }
 
-    @SubscribeEvent
-    public static void onHuskAttack(LivingHurtEvent event) {
-        Entity attacker = event.getSource().getEntity();
-        LivingEntity target = event.getEntity();
+@SubscribeEvent
+public static void onHuskAttack(LivingHurtEvent event) {
+    if (event.getEntity().level().isClientSide) return;
 
-        if (attacker instanceof LivingEntity livingAttacker) {
+    Entity attacker = event.getSource().getEntity();
+    
+    if (attacker instanceof LivingEntity livingAttacker) {
+        if (livingAttacker.getPersistentData().getBoolean(HuskSpecial.TAG_DROP_ANCIENT_LOOT)) {
             
-            if (livingAttacker.getPersistentData().getBoolean(HuskSpecial.TAG_DROP_ANCIENT_LOOT)) {
-                
+            long currentTime = livingAttacker.level().getGameTime();
+            String nbtKey = "last_sandstorm_tick";
+            
+            long lastTriggerTime = livingAttacker.getPersistentData().getLong(nbtKey);
+
+            if (currentTime - lastTriggerTime >= 20) {
                 CataclysmCompat.spawnSandstorm(livingAttacker);
+                
+                livingAttacker.getPersistentData().putLong(nbtKey, currentTime);
             }
         }
     }
+}
 
     @SubscribeEvent
     public static void onSpiderAttack(LivingHurtEvent event) {
@@ -65,6 +78,18 @@ public class SpecialCombatEvents {
                 net.minecraft.core.BlockPos pos = target.blockPosition();
                 if (target.level().isEmptyBlock(pos)) {
                     target.level().setBlockAndUpdate(pos, net.minecraft.world.level.block.Blocks.COBWEB.defaultBlockState());
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPiglinShoot(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof AbstractArrow arrow) {
+            if (arrow.getOwner() instanceof Piglin piglin && 
+                piglin.getPersistentData().getBoolean(PiglinSpecial.TAG_DROP_GOLD)) {
+                if (arrow instanceof Arrow tippedArrow) {
+                    tippedArrow.addEffect(new MobEffectInstance(MobEffects.HARM, 1, 1));
                 }
             }
         }
@@ -173,21 +198,19 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(DrownedSpecial.TAG_DROP_TRIDENT)) {
-            ItemStack trident = entity.getMainHandItem().copy();
+            ItemStack trident = new ItemStack(Items.TRIDENT);
             
-            if (trident.is(Items.TRIDENT)) {
-                int maxDamage = trident.getMaxDamage();
-                float randomPercent = 0.2F + entity.level().random.nextFloat() * 0.4F; // 0.2 ~ 0.6
-                int damageToSet = maxDamage - (int)(maxDamage * randomPercent);
-                
-                trident.setDamageValue(damageToSet);
+            int maxDamage = trident.getMaxDamage();
+            float randomPercent = 0.2F + entity.level().random.nextFloat() * 0.4F; 
+            int damageToSet = maxDamage - (int)(maxDamage * randomPercent);
+            
+            trident.setDamageValue(damageToSet);
 
-                event.getDrops().add(new ItemEntity(
-                    entity.level(), 
-                    entity.getX(), entity.getY(), entity.getZ(), 
-                    trident
-                ));
-            }
+            event.getDrops().add(new ItemEntity(
+                entity.level(), 
+                entity.getX(), entity.getY(), entity.getZ(), 
+                trident
+            ));
         }
 
         if (entity.getPersistentData().getBoolean(WitherSkeletonSpecial.TAG_DROP_SKULL)) {

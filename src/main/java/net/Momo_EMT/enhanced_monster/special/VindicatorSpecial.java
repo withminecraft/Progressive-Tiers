@@ -14,13 +14,16 @@ public class VindicatorSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof Vindicator vindicator)) return;
 
-        vindicator.setCanPickUpLoot(false);
-
         ItemStack ironAxe = new ItemStack(Items.IRON_AXE);
         ironAxe.enchant(Enchantments.SHARPNESS, 5);
+        ironAxe.enchant(Enchantments.VANISHING_CURSE, 1);
+        ironAxe.enchant(Enchantments.BINDING_CURSE, 1);
+        ironAxe.getOrCreateTag().putBoolean("Unbreakable", true);
+        
         vindicator.setItemSlot(EquipmentSlot.MAINHAND, ironAxe);
 
-        vindicator.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+        ItemStack totem = new ItemStack(Items.TOTEM_OF_UNDYING);
+        vindicator.setItemSlot(EquipmentSlot.OFFHAND, totem);
 
         vindicator.getPersistentData().putBoolean(TAG_DROP_EMERALD, true);
     }

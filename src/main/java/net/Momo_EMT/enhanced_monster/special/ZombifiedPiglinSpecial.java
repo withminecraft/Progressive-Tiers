@@ -16,30 +16,33 @@ public class ZombifiedPiglinSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof ZombifiedPiglin zPiglin)) return;
 
-        zPiglin.setCanPickUpLoot(false);
-
         equipGoldArmor(zPiglin, EquipmentSlot.HEAD, Items.GOLDEN_HELMET);
         equipGoldArmor(zPiglin, EquipmentSlot.CHEST, Items.GOLDEN_CHESTPLATE);
         equipGoldArmor(zPiglin, EquipmentSlot.LEGS, Items.GOLDEN_LEGGINGS);
         equipGoldArmor(zPiglin, EquipmentSlot.FEET, Items.GOLDEN_BOOTS);
 
         ItemStack sword = new ItemStack(Items.GOLDEN_SWORD);
-        sword.enchant(Enchantments.SHARPNESS, 5);
-        sword.enchant(Enchantments.FIRE_ASPECT, 2);
+        sword.enchant(Enchantments.SHARPNESS, 7);
+        sword.enchant(Enchantments.FIRE_ASPECT, 3);
+        sword.enchant(Enchantments.VANISHING_CURSE, 1);
+        sword.enchant(Enchantments.BINDING_CURSE, 1);
+        sword.getOrCreateTag().putBoolean("Unbreakable", true);
+        
         zPiglin.setItemSlot(EquipmentSlot.MAINHAND, sword);
 
-        zPiglin.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
         zPiglin.getPersistentData().putBoolean(TAG_DROP_GOLD, true);
     }
 
     private void equipGoldArmor(ZombifiedPiglin zPiglin, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);
-        stack.enchant(Enchantments.PROJECTILE_PROTECTION, 4);
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
         
         applySnoutLapisTrim(stack);
         
         zPiglin.setItemSlot(slot, stack);
-        zPiglin.setDropChance(slot, 0.0F);
     }
 
     private void applySnoutLapisTrim(ItemStack stack) {

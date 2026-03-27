@@ -22,8 +22,6 @@ public class HuskSpecial implements ISpecialElite {
         if (!(entity instanceof Husk husk)) return;
 
         if (isAncientRemnantDefeated(husk)) {
-            husk.setCanPickUpLoot(false);
-
             var koboletonType = ForgeRegistries.ENTITY_TYPES.getValue(ResourceLocation.tryParse("cataclysm:koboleton"));
             if (koboletonType != null) {
                 Entity mount = koboletonType.create(husk.level());
@@ -39,20 +37,32 @@ public class HuskSpecial implements ISpecialElite {
                 }
             }
             
-            husk.setItemSlot(EquipmentSlot.HEAD, getModItem("cataclysm:bone_reptile_helmet"));
-            husk.setItemSlot(EquipmentSlot.CHEST, getModItem("cataclysm:bone_reptile_chestplate"));
+            ItemStack helmet = prepareEliteItem("cataclysm:bone_reptile_helmet");
+            helmet.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
+            husk.setItemSlot(EquipmentSlot.HEAD, helmet);
 
-            ItemStack spear = getModItem("cataclysm:ancient_spear");
+            ItemStack chestplate = prepareEliteItem("cataclysm:bone_reptile_chestplate");
+            chestplate.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
+            husk.setItemSlot(EquipmentSlot.CHEST, chestplate);
+
+            ItemStack spear = prepareEliteItem("cataclysm:ancient_spear");
+            spear.enchant(Enchantments.SHARPNESS, 3); 
             spear.enchant(Enchantments.KNOCKBACK, 2);
             spear.enchant(Enchantments.FIRE_ASPECT, 2);
             husk.setItemSlot(EquipmentSlot.MAINHAND, spear);
-            
-            for (EquipmentSlot slot : EquipmentSlot.values()) {
-                husk.setDropChance(slot, 0.0F);
-            }
 
             husk.getPersistentData().putBoolean(TAG_DROP_ANCIENT_LOOT, true);
         }
+    }
+
+    private ItemStack prepareEliteItem(String registryName) {
+        ItemStack stack = getModItem(registryName);
+        if (!stack.isEmpty()) {
+            stack.enchant(Enchantments.VANISHING_CURSE, 1);
+            stack.enchant(Enchantments.BINDING_CURSE, 1);
+            stack.getOrCreateTag().putBoolean("Unbreakable", true);
+        }
+        return stack;
     }
 
     private boolean isAncientRemnantDefeated(LivingEntity entity) {

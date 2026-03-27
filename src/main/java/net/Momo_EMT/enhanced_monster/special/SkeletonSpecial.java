@@ -19,8 +19,6 @@ public class SkeletonSpecial implements ISpecialElite {
     public void apply(LivingEntity entity) {
         if (!(entity instanceof Skeleton skeleton)) return;
 
-        skeleton.setCanPickUpLoot(false);
-
         SkeletonHorse horse = EntityType.SKELETON_HORSE.create(skeleton.level());
         if (horse != null) {
             horse.moveTo(skeleton.getX(), skeleton.getY(), skeleton.getZ(), skeleton.getYRot(), skeleton.getXRot());
@@ -50,28 +48,34 @@ public class SkeletonSpecial implements ISpecialElite {
         ItemStack bow = new ItemStack(Items.BOW);
         bow.enchant(Enchantments.PUNCH_ARROWS, 2);
         bow.enchant(Enchantments.FLAMING_ARROWS, 1);
+        bow.enchant(Enchantments.POWER_ARROWS, 3);
+        bow.enchant(Enchantments.VANISHING_CURSE, 1);
+        bow.enchant(Enchantments.BINDING_CURSE, 1);
+        bow.getOrCreateTag().putBoolean("Unbreakable", true);
+
         skeleton.setItemSlot(EquipmentSlot.MAINHAND, bow);
-        skeleton.setDropChance(EquipmentSlot.MAINHAND, 0.0F); 
     }
 
     private void equipArmor(Skeleton skeleton, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);
-        stack.enchant(Enchantments.THORNS, 3);
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
         
-        applyWildAmethystTrim(stack);
+        applyShaperRedstoneTrim(stack);
         
         skeleton.setItemSlot(slot, stack);
-        skeleton.setDropChance(slot, 0.0F); 
     }
 
-    private void applyWildAmethystTrim(ItemStack stack) {
+    private void applyShaperRedstoneTrim(ItemStack stack) {
         if (!(stack.getItem() instanceof ArmorItem)) return;
 
         CompoundTag nbt = stack.getOrCreateTag();
         CompoundTag trimTag = new CompoundTag();
 
-        trimTag.putString("pattern", "minecraft:wild");
-        trimTag.putString("material", "minecraft:amethyst");
+        trimTag.putString("pattern", "minecraft:shaper");
+        trimTag.putString("material", "minecraft:redstone");
 
         nbt.put("Trim", trimTag);
     }
