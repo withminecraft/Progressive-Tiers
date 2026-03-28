@@ -186,7 +186,7 @@ public class ModEvents {
                         }
                     }
                 }
-            } catch (Exception ignored) {} // 忽略配置格式错误的行
+            } catch (Exception ignored) {} 
         }
     }
 
@@ -195,7 +195,6 @@ public class ModEvents {
         LivingEntity victim = event.getEntity();
         if (victim.level().isClientSide) return;
 
-        // --- 新增：副本免伤逻辑 ---
         Entity attackerEntity = event.getSource().getEntity();
         if (attackerEntity instanceof LivingEntity attacker) {
             CompoundTag vNbt = victim.getPersistentData();
@@ -214,7 +213,7 @@ public class ModEvents {
                     mob.setTarget(null);
                     mob.setLastHurtByMob(null);
                 }
-                return; // 如果是家属攻击，直接返回，不再走后面的火抗逻辑
+                return; 
             }
         }
 
@@ -360,11 +359,9 @@ public class ModEvents {
         for (int i = 0; i < 2; i++) {
             Entity summon = parent.getType().create(serverLevel);
             if (summon instanceof LivingEntity livingSummon) {
-                // 1. 标记标签与绑定原主
                 livingSummon.getPersistentData().putBoolean("EM_SkipAllocation", true);
                 livingSummon.getPersistentData().putUUID("EM_Summoner_Owner", parent.getUUID());
                 
-                // 2. 继承仇恨逻辑
                 if (parent instanceof Mob parentMob && livingSummon instanceof Mob summonMob) {
                     summonMob.setTarget(parentMob.getTarget());
                     summonMob.setLastHurtByMob(parentMob.getLastHurtByMob());
@@ -374,7 +371,7 @@ public class ModEvents {
                 }
 
                 double angle = (parent.getYRot() + (i == 0 ? 135.0F : -135.0F)) * (Math.PI / 180.0D);
-                double distance = 1.5D; // 固定的偏离距离
+                double distance = 1.5D; 
 
                 double offsetX = -Math.sin(angle) * distance;
                 double offsetZ = Math.cos(angle) * distance;
@@ -386,7 +383,7 @@ public class ModEvents {
                 
                 serverLevel.sendParticles(ParticleTypes.PORTAL, 
                     livingSummon.getX(), livingSummon.getY(0.5), livingSummon.getZ(), 
-                    40, 0.2, 0.5, 0.2, 0.5);
+                    40, 0.5, 0.5, 0.5, 0.0);
                 
                 serverLevel.playSound(null, livingSummon.getX(), livingSummon.getY(), livingSummon.getZ(), 
                     net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT, 
