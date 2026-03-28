@@ -322,12 +322,17 @@ public class ModEvents {
                 livingSummon.getPersistentData().putUUID("EM_Summoner_Owner", parent.getUUID());
                 if (parent instanceof Mob parentMob && livingSummon instanceof Mob summonMob) {
                     summonMob.setTarget(parentMob.getTarget());
+                    summonMob.setLastHurtByMob(parentMob.getLastHurtByMob());
+
                     summonMob.finalizeSpawn(serverLevel, serverLevel.getCurrentDifficultyAt(summonMob.blockPosition()), 
                         net.minecraft.world.entity.MobSpawnType.MOB_SUMMONED, null);
                 }
                 double angle = (parent.getYRot() + (i == 0 ? 135.0F : -135.0F)) * (Math.PI / 180.0D);
                 livingSummon.moveTo(parent.getX() - Math.sin(angle) * 1.5, parent.getY(), parent.getZ() + Math.cos(angle) * 1.5, parent.getYRot(), parent.getXRot());
-                serverLevel.sendParticles(ParticleTypes.PORTAL, livingSummon.getX(), livingSummon.getY(0.5), livingSummon.getZ(), 40, 0.2, 0.5, 0.2, 0.5);
+                serverLevel.sendParticles(ParticleTypes.PORTAL, livingSummon.getX(), livingSummon.getY(0.5), livingSummon.getZ(), 40, 0.5, 0.5, 0.5, 0.0);
+                serverLevel.playSound(null, livingSummon.getX(), livingSummon.getY(), livingSummon.getZ(), 
+                    net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT, 
+                    net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 1.0F);
                 serverLevel.addFreshEntity(livingSummon);
             }
         }
