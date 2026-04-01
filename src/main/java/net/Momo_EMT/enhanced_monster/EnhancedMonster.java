@@ -2,6 +2,7 @@ package net.Momo_EMT.enhanced_monster;
 
 import net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment;
 import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait;
+import net.Momo_EMT.enhanced_monster.item.ModItems;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -17,6 +18,8 @@ public class EnhancedMonster {
 
     public EnhancedMonster(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(Type.COMMON, net.Momo_EMT.enhanced_monster.ModConfig.SPEC, "enhanced_monster-common.toml");
+
+        ModItems.ITEMS.register(modEventBus);
 
         MobTraitAttachment.ATTACHMENT_TYPES.register(modEventBus);
 

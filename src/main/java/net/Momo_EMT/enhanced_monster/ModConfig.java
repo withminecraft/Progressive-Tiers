@@ -22,8 +22,6 @@ public class ModConfig {
     public static final ModConfigSpec.DoubleValue TIER_1_LIMIT;
     public static final ModConfigSpec.DoubleValue TIER_2_LIMIT;
     
-    public static final ModConfigSpec.BooleanValue ENABLE_DROPS;
-    
     public static final ModConfigSpec.BooleanValue ENABLE_PARTICLES;
     public static final ModConfigSpec.BooleanValue ENABLE_GLOWING;
 
@@ -69,7 +67,8 @@ public class ModConfig {
         ).defineList("boss_list", List.of(
                 "minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", 
                 "cataclysm:the_leviathan", "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "irons_spellbooks:fire_boss", 
-                "mowziesmobs:ferrous_wroughtnaut", "mowziesmobs:frostmaw", "mowziesmobs:umvuthi"
+                "mowziesmobs:ferrous_wroughtnaut", "mowziesmobs:frostmaw", "mowziesmobs:umvuthi", "spore:sieger", "spore:gazenbreacher", "spore:hindenburg", "spore:howitzer", 
+                "spore:hohlfresser", "spore:kraken", "spore:stahl"
         ), obj -> obj instanceof String);
 
         TIER_1_LIMIT = BUILDER.comment(
@@ -81,11 +80,6 @@ public class ModConfig {
                 "第二梯度上限血量（默认120）。血量超过此值的生物将被视为第三梯度。",
                 "Tier 2 Max Health (Default 120). Entities with health above this will be considered Tier 3."
         ).defineInRange("tier_2_limit", 120.0, 0.0, 1000000.0);
-
-        ENABLE_DROPS = BUILDER.comment(
-                "是否开启精英怪/BOSS死亡时的随机附魔书掉落。",
-                "Enable/Disable randomized enchanted book drops for Elite/Boss mobs."
-        ).define("enable_drops", true);
 
         ENABLE_PARTICLES = BUILDER.comment(
                 "是否开启精英怪/BOSS的粒子特效（仅视觉）。",
@@ -141,7 +135,6 @@ public class ModConfig {
     public static void onConfigReload(final ModConfigEvent.Reloading event) {
         if (event.getConfig().getSpec() == SPEC) {
             bakeConfig(); 
-            ModEvents.clearEnchantmentCache();
         }
     }
 

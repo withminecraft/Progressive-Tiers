@@ -19,13 +19,11 @@ public class CommandEvents {
                     
                     try {
                         ModConfig.bakeConfig();
-
-                        ModEvents.clearEnchantmentCache();
                         
                         context.getSource().sendSuccess(() -> 
                             Component.literal("§a[Enhanced Monster] 配置已完成重载！"), true);
                         context.getSource().sendSuccess(() -> 
-                            Component.literal("§7(提示：变更仅对重载后新生成的怪物体效)"), false);
+                            Component.literal("§7(提示：变更仅对重载后新生成的怪物生效)"), false);
                             
                     } catch (Exception e) {
                         context.getSource().sendFailure(Component.literal("§c[Enhanced Monster] 重载过程中发生错误，请检查控制台！"));

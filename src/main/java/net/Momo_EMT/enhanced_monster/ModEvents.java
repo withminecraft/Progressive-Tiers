@@ -2,6 +2,8 @@ package net.Momo_EMT.enhanced_monster;
 
 import net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment;
 import net.Momo_EMT.enhanced_monster.capability.MobTraitData;
+import net.Momo_EMT.enhanced_monster.item.ModItems;
+import net.Momo_EMT.enhanced_monster.item.TraitConfig;
 import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
@@ -23,8 +25,6 @@ import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -42,33 +42,18 @@ import java.util.stream.Collectors;
 
 @EventBusSubscriber(modid = "enhanced_monster")
 public class ModEvents {
+    private static final ResourceLocation REGEN_PENALTY_ID = ResourceLocation.fromNamespaceAndPath("enhanced_monster", "regen_max_health_penalty");
 
     @SubscribeEvent
     public static void onStartTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof LivingEntity living && !living.level().isClientSide) {
             MobTraitData data = living.getData(MobTraitAttachment.MOB_TRAIT);
-            if (data.isProcessed() && data.getQuality() > 0) {
+            if (!data.getTraits().isEmpty()) {
                 CompoundTag syncTag = data.serializeNBT(); 
                 PacketDistributor.sendToPlayer((ServerPlayer) event.getEntity(), 
                     new PacketSyncMobTrait(living.getId(), syncTag));
             }
         }
-    }
-
-    private static List<Holder<Enchantment>> CACHED_ENCHANTMENTS;
-
-    public static void clearEnchantmentCache() {
-        CACHED_ENCHANTMENTS = null;
-    }
-
-    private static List<Holder<Enchantment>> getAvailableEnchantments(LivingEntity entity) {
-        if (CACHED_ENCHANTMENTS == null) {
-            var registry = entity.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
-            CACHED_ENCHANTMENTS = registry.listElements()
-                .filter(ench -> !ench.is(EnchantmentTags.CURSE) && !ench.is(EnchantmentTags.TREASURE))
-                .collect(Collectors.toList());
-        }
-        return CACHED_ENCHANTMENTS;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -82,61 +67,58 @@ public class ModEvents {
     public static void onMobDeath(LivingDeathEvent event) {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide) return;
+
         if (entity.getPersistentData().getBoolean("em_loot_generated")) return;
         entity.getPersistentData().putBoolean("em_loot_generated", true);
 
         MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
         int quality = data.getQuality();
         boolean isBoss = data.isBoss();
-        if (quality < 2 && !isBoss) return;
+        Map<String, Integer> traitsMap = data.getTraits();
+
+        if (traitsMap.isEmpty()) return;
 
         if (isBoss) handleCustomDrops(entity, ModConfig.BOSS_EXTRA_DROPS.get());
         else if (quality == 3) handleCustomDrops(entity, ModConfig.QUALITY_3_EXTRA_DROPS.get());
         else if (quality == 2) handleCustomDrops(entity, ModConfig.QUALITY_2_EXTRA_DROPS.get());
 
-        if (!ModConfig.ENABLE_DROPS.get()) return;
-
         RandomSource random = entity.getRandom();
-        int dropCount = isBoss ? 3 : (quality == 3 ? 1 + random.nextInt(2) : (random.nextFloat() < 0.5f ? 1 : 0));
-        if (dropCount <= 0) return;
+        float dropChance = 0f;
+        int bookLevel = 0;
 
-        List<Holder<Enchantment>> available = getAvailableEnchantments(entity);
-        if (available.isEmpty()) return;
+        if (isBoss) {
+            dropChance = 0.80f;
+            bookLevel = 2; // 3级书 (索引2)
+        } else if (quality == 3) {
+            dropChance = 0.40f;
+            bookLevel = 1; // 2级书 (索引1)
+        } else if (quality == 2) {
+            dropChance = 0.10f;
+            bookLevel = 0; // 1级书 (索引0)
+        }
 
-        for (int i = 0; i < dropCount; i++) {
-            Holder<Enchantment> randomEnch;
-            Enchantment ench;
-            int maxLvl;
-            
-            // --- 过滤逻辑开始 ---
-            int attempts = 0;
-            do {
-                randomEnch = available.get(random.nextInt(available.size()));
-                ench = randomEnch.value();
-                maxLvl = ench.getMaxLevel();
-                attempts++;
-            } while (quality == 2 && !isBoss && maxLvl <= 1 && attempts < 10);
-            // --- 过滤逻辑结束 ---
+        if (dropChance <= 0f) return;
 
-            int level;
-            if (isBoss) {
-                level = Math.max(1, maxLvl - 1);
-            } else if (quality == 3) {
-                int min = Math.max(1, maxLvl / 2);
-                level = min + (maxLvl > min ? random.nextInt(maxLvl - min + 1) : 0);
-            } else {
-                level = 1 + random.nextInt(Math.max(1, maxLvl / 2));
+        for (Map.Entry<String, Integer> entry : traitsMap.entrySet()) {
+            String traitId = entry.getKey();
+
+            if (!TraitConfig.hasItem(traitId)) continue;
+            if (!isBoss && (traitId.equals(EffectAllocator.BERSERK) || traitId.equals(EffectAllocator.LIFESTEAL))) {
+                continue;
             }
 
-            ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-            ItemEnchantments.Mutable mutableEnchants = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
-            mutableEnchants.set(randomEnch, level);
-            EnchantmentHelper.setEnchantments(enchantedBook, mutableEnchants.toImmutable());
-
-            ItemEntity itemEntity = new ItemEntity(entity.level(), entity.getX(), entity.getY() + 0.5, entity.getZ(), enchantedBook);
-            itemEntity.setPickUpDelay(10);
-            itemEntity.setInvulnerable(true);
-            entity.level().addFreshEntity(itemEntity);
+            if (random.nextFloat() < dropChance) {
+                int finalLevel = Math.min(bookLevel, TraitConfig.getMaxLevel(traitId));
+                
+                ItemStack traitBook = ModItems.createTraitStack(traitId, finalLevel);
+                if (!traitBook.isEmpty()) {
+                    ItemEntity itemEntity = new ItemEntity(entity.level(), 
+                        entity.getX(), entity.getY() + 0.5, entity.getZ(), traitBook);
+                    itemEntity.setPickUpDelay(10);
+                    itemEntity.setInvulnerable(true);
+                    entity.level().addFreshEntity(itemEntity);
+                }
+            }
         }
     }
 
@@ -298,9 +280,8 @@ public class ModEvents {
         if (entity.isAlive() && entity.tickCount % 20 == 0) {
             MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
             
-            Integer regenLevel = data.getTraits().get(EffectAllocator.REGENERATING);
-            if (regenLevel != null && entity.getHealth() < entity.getMaxHealth()) {
-                entity.heal((regenLevel + 1) * 0.5f);
+            if (data.getTraits().containsKey(EffectAllocator.REGENERATING)) {
+                handleCustomRegen(entity);
             }
             
             if (data.getTraits().containsKey(EffectAllocator.SUMMONER)) {
@@ -308,6 +289,48 @@ public class ModEvents {
                     entity.getHealth() <= entity.getMaxHealth() * 0.5f) {
                     spawnSummons(entity);
                     entity.getPersistentData().putBoolean("em_summoned", true);
+                }
+            }
+        }
+    }
+
+    private static void handleCustomRegen(LivingEntity entity) {
+        CompoundTag nbt = entity.getPersistentData();
+        long currentTime = entity.level().getGameTime();
+        
+        long cooldownEnd = nbt.getLong("EM_Regen_CD");
+        long effectEnd = nbt.getLong("EM_Regen_Active_End");
+
+        var maxHealthInstance = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        if (maxHealthInstance == null) return;
+        double baseMax = maxHealthInstance.getBaseValue();
+
+        if (currentTime < effectEnd) {
+            entity.heal((float) (baseMax * 0.01f));
+            if (entity.level() instanceof ServerLevel sl) {
+                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 3, 0.2, 0.2, 0.2, 0.0);
+            }
+        } 
+        else if (currentTime >= cooldownEnd && entity.getHealth() <= (float) (baseMax * 0.3f)) {
+            
+            nbt.putLong("EM_Regen_Active_End", currentTime + 600);
+            nbt.putLong("EM_Regen_CD", currentTime + 1200);
+
+            if (entity.getMaxHealth() > baseMax * 0.41) {
+                double currentPenalty = 0;
+                var existingMod = maxHealthInstance.getModifier(REGEN_PENALTY_ID);
+                if (existingMod != null) {
+                    currentPenalty = existingMod.amount();
+                    maxHealthInstance.removeModifier(REGEN_PENALTY_ID);
+                }
+
+                maxHealthInstance.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        REGEN_PENALTY_ID, 
+                        currentPenalty - (baseMax * 0.2), 
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+                
+                if (entity.getHealth() > entity.getMaxHealth()) {
+                    entity.setHealth(entity.getMaxHealth());
                 }
             }
         }
