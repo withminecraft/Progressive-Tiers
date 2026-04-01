@@ -11,5 +11,26 @@
   "trait.enhanced_monster.lifesteal": "Lifesteal",
   "trait.enhanced_monster.tanky": "Tanky",
   "trait.enhanced_monster.void": "Void",
-  "trait.enhanced_monster.summoner": "Summoner"
+  "trait.enhanced_monster.summoner": "Summoner",
+
+  "item.enhanced_monster.trait_powerful": "Trait: Powerful",
+  "item.enhanced_monster.trait_regenerating": "Trait: Regen",
+  "item.enhanced_monster.trait_speedy": "Trait: Speedy",
+  "item.enhanced_monster.trait_protected": "Trait: Protected",
+  "item.enhanced_monster.trait_fire_prot": "Trait: Fireproof",
+  "item.enhanced_monster.trait_poisonous": "Trait: Poisonous",
+  "item.enhanced_monster.trait_stray": "Trait: Stray",
+  "item.enhanced_monster.trait_weakener": "Trait: Weakening",
+  "item.enhanced_monster.trait_berserk": "Trait: Berserk",
+  "item.enhanced_monster.trait_lifesteal": "Trait: Lifesteal",
+  "item.enhanced_monster.trait_tanky": "Trait: Tanky",
+  "item.enhanced_monster.trait_void": "Trait: Void",
+  "item.enhanced_monster.trait_summoner": "Trait: Summoner",
+
+  "tooltip.enhanced_monster.empty_trait": "§8Empty Trait Data",
+  "tooltip.enhanced_monster.shift_to_use": "§dHold Shift to apply trait",
+  "chat.enhanced_monster.not_your_pet": "§cYou can only use this on your own pet!",
+  "chat.enhanced_monster.level_too_low": "§eItem level is too low to override existing trait.",
+  "chat.enhanced_monster.max_traits_reached": "§6Max trait limit reached (5/5).",
+  "chat.enhanced_monster.apply_success": "§aSuccessfully applied trait: %s %s"
 }

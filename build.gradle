@@ -132,8 +132,9 @@ dependencies {
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-common-api:${jei_version}")
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
-    implementation fg.deobf("local:Jade-1.20.1-Forge:11.13.2")
-    compileOnly fg.deobf(files("libs/L_Enders_Cataclysm-3.16.jar"))
+    compileOnly fg.deobf(files("libs/Jade-1.20.1-Forge-11.13.2.jar"))
+    compileOnly fg.deobf(files("libs/jei-1.20.1-forge-15.20.0.129.jar"))
+    compileOnly fg.deobf(files("libs/L_Enders_Cataclysm-3.25.jar"))
 
     // Example mod dependency using a mod jar from ./libs with a flat dir repository
     // This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar

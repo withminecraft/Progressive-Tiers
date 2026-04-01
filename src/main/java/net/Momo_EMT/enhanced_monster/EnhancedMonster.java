@@ -2,6 +2,8 @@ package net.Momo_EMT.enhanced_monster;
 
 import net.Momo_EMT.enhanced_monster.capability.IMobTrait;
 import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait; 
+import net.Momo_EMT.enhanced_monster.item.ModItems;
+import net.Momo_EMT.enhanced_monster.item.ModItemEvents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -26,6 +28,8 @@ public class EnhancedMonster {
 
     public EnhancedMonster(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
+
+        ModItems.ITEMS.register(modEventBus);
 
         context.registerConfig(Type.COMMON, net.Momo_EMT.enhanced_monster.ModConfig.SPEC, "enhanced_monster-common.toml");
         

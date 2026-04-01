@@ -75,7 +75,7 @@ public enum EMJadeProvider implements IEntityComponentProvider, IServerDataProvi
             case EffectAllocator.PROTECTED -> 0xFFFF55;
             case EffectAllocator.FIRE_PROT -> 0xFFAA00;
             case EffectAllocator.POISONOUS -> 0x55FF55;
-            case EffectAllocator.STRAY -> 0xAAAAAA;
+            case EffectAllocator.STRAY -> 0x00AEEF;
             case EffectAllocator.WEAKENER -> 0x555555;
             case EffectAllocator.BERSERK -> 0xAA0000;
             case EffectAllocator.LIFESTEAL -> 0xCC0000;

@@ -107,7 +107,7 @@ public class EffectAllocator {
                 new PacketSyncMobTrait(entity.getId(), syncTag));
     }
 
-private static void adjustHealth(LivingEntity entity, int quality) {
+    private static void adjustHealth(LivingEntity entity, int quality) {
         if (isBoss(entity)) return;
 
         var attribute = entity.getAttribute(Attributes.MAX_HEALTH);
@@ -177,7 +177,7 @@ private static void adjustHealth(LivingEntity entity, int quality) {
         }
     }
 
-    private static void applyImmediateAttributes(LivingEntity entity, String tag, int level) {
+    public static void applyImmediateAttributes(LivingEntity entity, String tag, int level) {
         if (tag.equals(POWERFUL)) {
             safeApplyModifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_UUID, "EM Attack Bonus", (level + 1) * 2.0, AttributeModifier.Operation.ADDITION);
         } else if (tag.equals(SPEEDY)) {

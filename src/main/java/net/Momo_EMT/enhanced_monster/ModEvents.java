@@ -3,6 +3,8 @@ package net.Momo_EMT.enhanced_monster;
 import net.Momo_EMT.enhanced_monster.capability.IMobTrait;
 import net.Momo_EMT.enhanced_monster.capability.MobTraitProvider;
 import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait;
+import net.Momo_EMT.enhanced_monster.item.TraitConfig;
+import net.Momo_EMT.enhanced_monster.item.ModItems;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -19,8 +21,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.*;
@@ -38,15 +38,14 @@ import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = "enhanced_monster", bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ModEvents {
+    private static final UUID REGEN_DEBUFF_UUID = UUID.fromString("7e7e1234-abcd-4f1a-8e9a-555555555555");
 
     @SubscribeEvent
     public static void onAttachCapabilities(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof LivingEntity living) {
             String entityId = ForgeRegistries.ENTITY_TYPES.getKey(living.getType()).toString();
             
-            boolean isListedBoss = ModConfig.isBoss(entityId); 
-            
-            if (isListedBoss || (living instanceof Enemy)) {
+            if (event.getObject() instanceof LivingEntity) {
                 event.addCapability(ResourceLocation.fromNamespaceAndPath(EnhancedMonster.MODID, "traits"), new MobTraitProvider());
             }
         }
@@ -56,28 +55,13 @@ public class ModEvents {
     public static void onStartTracking(PlayerEvent.StartTracking event) {
         if (event.getTarget() instanceof LivingEntity living && !living.level().isClientSide) {
             living.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
-                if (cap.isProcessed() && cap.getQuality() > 0) {
+                if (!cap.getTraits().isEmpty()) {
                     CompoundTag syncTag = cap.serializeNBT();
                     EnhancedMonster.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer) event.getEntity()), 
                         new PacketSyncMobTrait(living.getId(), syncTag));
                 }
             });
         }
-    }
-
-    private static List<Enchantment> CACHED_ENCHANTMENTS;
-
-    public static void clearEnchantmentCache() {
-        CACHED_ENCHANTMENTS = null;
-    }
-
-    private static List<Enchantment> getAvailableEnchantments() {
-        if (CACHED_ENCHANTMENTS == null) {
-            CACHED_ENCHANTMENTS = ForgeRegistries.ENCHANTMENTS.getValues().stream()
-                .filter(ench -> ench.isAllowedOnBooks() && !ench.isCurse() && !ench.isTreasureOnly())
-                .toList();
-        }
-        return CACHED_ENCHANTMENTS;
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -92,15 +76,15 @@ public class ModEvents {
         LivingEntity entity = event.getEntity();
         if (entity.level().isClientSide) return;
 
-        if (entity.getPersistentData().getBoolean("em_loot_generated")) {
-            return;
-        }
+        if (entity.getPersistentData().getBoolean("em_loot_generated")) return;
         entity.getPersistentData().putBoolean("em_loot_generated", true);
 
         entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
             int quality = cap.getQuality();
             boolean isBoss = cap.isBoss();
-            if (quality < 2 && !isBoss) return;
+            var traitsMap = cap.getTraits(); 
+
+            if (traitsMap.isEmpty()) return;
 
             if (isBoss) {
                 handleCustomDrops(entity, ModConfig.BOSS_EXTRA_DROPS.get());
@@ -110,52 +94,44 @@ public class ModEvents {
                 handleCustomDrops(entity, ModConfig.QUALITY_2_EXTRA_DROPS.get());
             }
 
-            if (!ModConfig.ENABLE_DROPS.get()) return;
-            
             RandomSource random = entity.getRandom();
-            int dropCount = 0;
+            float dropChance = 0f;
+            int bookLevel = 0;
+
             if (isBoss) {
-                dropCount = 3;
+                dropChance = 0.80f;
+                bookLevel = 2; // 3级书
             } else if (quality == 3) {
-                dropCount = 1 + random.nextInt(2);
+                dropChance = 0.40f;
+                bookLevel = 1; // 2级书
             } else if (quality == 2) {
-                dropCount = random.nextFloat() < 0.5f ? 1 : 0;
+                dropChance = 0.10f;
+                bookLevel = 0; // 1级书
             }
 
-            if (dropCount <= 0) return;
+            if (dropChance <= 0f) return;
 
-            List<Enchantment> available = getAvailableEnchantments();
-            if (available.isEmpty()) return;
+            for (Map.Entry<String, Integer> entry : traitsMap.entrySet()) {
+                String traitId = entry.getKey();
 
-            List<Enchantment> filteredForQuality2 = null;
-            if (quality == 2 && !isBoss) {
-                filteredForQuality2 = available.stream().filter(ench -> ench.getMaxLevel() > 1).toList();
-            }
+                if (!TraitConfig.hasItem(traitId)) continue;
 
-            for (int i = 0; i < dropCount; i++) {
-                List<Enchantment> currentPool = (quality == 2 && !isBoss) ? filteredForQuality2 : available;
-                if (currentPool == null || currentPool.isEmpty()) break;
-
-                Enchantment randomEnch = currentPool.get(random.nextInt(currentPool.size()));
-                int maxLvl = randomEnch.getMaxLevel();
-                int level;
-
-                if (isBoss) {
-                    level = Math.max(1, maxLvl - 1);
-                } else if (quality == 3) {
-                    int min = Math.max(1, maxLvl / 2);
-                    int range = Math.max(1, maxLvl - min); 
-                    level = min + (range > 0 ? random.nextInt(range) : 0);
-                } else {
-                    level = 1 + random.nextInt(Math.max(1, maxLvl / 2));
+                if (!isBoss && (traitId.equals(EffectAllocator.BERSERK) || traitId.equals(EffectAllocator.LIFESTEAL))) {
+                    continue;
                 }
 
-                ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-                EnchantmentHelper.setEnchantments(Map.of(randomEnch, level), enchantedBook);
-                ItemEntity itemEntity = new ItemEntity(entity.level(), entity.getX(), entity.getY() + 0.5, entity.getZ(), enchantedBook);
-                itemEntity.setPickUpDelay(10);
-                itemEntity.setInvulnerable(true);
-                entity.level().addFreshEntity(itemEntity);
+                if (random.nextFloat() < dropChance) {
+                    int finalLevel = Math.min(bookLevel, TraitConfig.getMaxLevel(traitId));
+                    
+                    ItemStack traitBook = ModItems.createTraitStack(traitId, finalLevel);
+                    if (!traitBook.isEmpty()) {
+                        ItemEntity itemEntity = new ItemEntity(entity.level(), 
+                            entity.getX(), entity.getY() + 0.5, entity.getZ(), traitBook);
+                        itemEntity.setPickUpDelay(10);
+                        itemEntity.setInvulnerable(true);
+                        entity.level().addFreshEntity(itemEntity);
+                    }
+                }
             }
         });
     }
@@ -334,11 +310,10 @@ public class ModEvents {
             return; 
         }
 
-        if (entity.isAlive() && entity.tickCount % 20 == 0 && entity.getHealth() < entity.getMaxHealth()) {
+        if (entity.isAlive() && entity.tickCount % 20 == 0) {
             entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
-                Integer regenLevel = cap.getTraits().get(EffectAllocator.REGENERATING);
-                if (regenLevel != null) {
-                    entity.heal((regenLevel + 1) * 0.5f);
+                if (cap.getTraits().containsKey(EffectAllocator.REGENERATING)) {
+                    handleCustomRegen(entity);
                 }
 
                 if (cap.getTraits().containsKey(EffectAllocator.SUMMONER)) {
@@ -350,6 +325,49 @@ public class ModEvents {
                     }
                 }
             });
+        }
+    }
+
+    private static void handleCustomRegen(LivingEntity entity) {
+        CompoundTag data = entity.getPersistentData();
+        long currentTime = entity.level().getGameTime();
+        
+        long cooldownEnd = data.getLong("EM_Regen_CD");
+        long effectEnd = data.getLong("EM_Regen_Active_End");
+
+        var maxHealthAttr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+        if (maxHealthAttr == null) return;
+        double originalMax = maxHealthAttr.getBaseValue();
+
+        if (currentTime < effectEnd) {
+            float healAmount = (float) (originalMax * 0.01f);
+            entity.heal(healAmount);
+            // 粒子反馈
+            if (entity.level() instanceof ServerLevel sl) {
+                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 3, 0.2, 0.2, 0.2, 0.0);
+            }
+        } 
+        else if (currentTime >= cooldownEnd && entity.getHealth() <= (originalMax * 0.3f)) {
+            
+            data.putLong("EM_Regen_Active_End", currentTime + 600);
+            data.putLong("EM_Regen_CD", currentTime + 1200);
+
+            if (entity.getMaxHealth() > originalMax * 0.41) {
+                double currentModifier = 0;
+                var oldMod = maxHealthAttr.getModifier(REGEN_DEBUFF_UUID);
+                if (oldMod != null) {
+                    currentModifier = oldMod.getAmount();
+                    maxHealthAttr.removeModifier(REGEN_DEBUFF_UUID);
+                }
+                
+                maxHealthAttr.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                        REGEN_DEBUFF_UUID, "Regen Penalty", currentModifier - (originalMax * 0.2), 
+                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
+                
+                if (entity.getHealth() > entity.getMaxHealth()) {
+                    entity.setHealth(entity.getMaxHealth());
+                }
+            }
         }
     }
 
