@@ -245,6 +245,7 @@ public class ModEvents {
 
             if (atkTraits.containsKey(EffectAllocator.STRAY)) {
                 victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, atkTraits.get(EffectAllocator.STRAY)));
+                victim.setTicksFrozen(400);
             }
 
             if (atkTraits.containsKey(EffectAllocator.WEAKENER)) {
