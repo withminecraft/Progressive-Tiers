@@ -1,5 +1,6 @@
 package net.Momo_EMT.enhanced_monster;
 
+import net.Momo_EMT.enhanced_monster.util.StructureValidator;
 import net.Momo_EMT.enhanced_monster.capability.IMobTrait;
 import net.Momo_EMT.enhanced_monster.capability.MobTraitProvider;
 import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait;
@@ -64,27 +65,32 @@ public class EffectAllocator {
         entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
             if (cap.isProcessed()) return;
 
-            boolean isUndead = entity.isInvertedHealAndHarm();
             int quality;
             int count;
 
             if (isMobBoss) {
                 quality = 3;
                 count = 5;
-                giveEffects(entity, count, quality, isUndead, true, cap);
-            } else {
+                giveEffects(entity, count, quality, true, cap);
+            } 
+            else if (isEntityInSpecialStructure(entity)) {
+                quality = rollStructureQuality(); 
+                count = getCountForQuality(quality);
+                adjustHealth(entity, quality);
+                if (count > 0) {
+                    giveEffects(entity, count, quality, quality == 3, cap);
+                }
+            }
+            else {
                 double maxHealth = entity.getMaxHealth();
                 int tier = 1;
                 if (maxHealth > ModConfig.TIER_2_LIMIT.get()) tier = 3;
                 else if (maxHealth > ModConfig.TIER_1_LIMIT.get()) tier = 2;
-
                 quality = rollQuality(tier);
                 count = getCountForQuality(quality);
-
                 adjustHealth(entity, quality);
-
                 if (count > 0) {
-                    giveEffects(entity, count, quality, isUndead, quality == 3, cap);
+                    giveEffects(entity, count, quality, quality == 3, cap);
                 }
             }
 
@@ -95,6 +101,10 @@ public class EffectAllocator {
             SpecialManager.tryApply(entity, quality);
             syncAndSave(entity, cap);
         });
+    }
+
+    private static boolean isEntityInSpecialStructure(LivingEntity entity) {
+        return StructureValidator.isEntityInSpecialStructure(entity);
     }
 
     private static void syncAndSave(LivingEntity entity, IMobTrait cap) {
@@ -134,12 +144,19 @@ public class EffectAllocator {
         }
     }
 
+    private static int rollStructureQuality() {
+        int roll = RANDOM.nextInt(100);
+        if (roll < 10) return 1; 
+        if (roll < 70) return 2; 
+        return 3;    
+    }
+
     private static int rollQuality(int tier) {
-        int roll = RANDOM.nextInt(1000);
+        int roll = RANDOM.nextInt(100);
         return switch (tier) {
-            case 1 -> (roll < 900) ? 1 : (roll < 995 ? 2 : 3);
-            case 2 -> (roll < 200) ? 1 : (roll < 950 ? 2 : 3);
-            default -> (roll < 10) ? 1 : (roll < 340 ? 2 : 3);
+            case 1 -> (roll < 90) ? 1 : (roll < 99 ? 2 : 3);
+            case 2 -> (roll < 15) ? 1 : (roll < 90 ? 2 : 3);
+            default -> (roll < 1) ? 1 : (roll < 34 ? 2 : 3);
         };
     }
 
@@ -153,7 +170,7 @@ public class EffectAllocator {
         };
     }
 
-    private static void giveEffects(LivingEntity entity, int count, int quality, boolean isUndead, boolean shouldGlow, IMobTrait cap) {
+    private static void giveEffects(LivingEntity entity, int count, int quality, boolean shouldGlow, IMobTrait cap) {
         List<EffectPools.EffectEntry> pool = new ArrayList<>(EffectPools.getPool(quality, isBoss(entity)));
         Collections.shuffle(pool);
 
