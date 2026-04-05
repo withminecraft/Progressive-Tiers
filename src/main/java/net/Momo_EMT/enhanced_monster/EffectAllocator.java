@@ -148,9 +148,9 @@ public class EffectAllocator {
     private static int rollQuality(int tier) {
         int roll = RANDOM.nextInt(100);
         return switch (tier) {
-            case 1 -> (roll < 90) ? 1 : (roll < 99 ? 2 : 3);
+            case 1 -> (roll < 84) ? 1 : (roll < 99 ? 2 : 3);
             case 2 -> (roll < 15) ? 1 : (roll < 90 ? 2 : 3);
-            default -> (roll < 1) ? 1 : (roll < 34 ? 2 : 3);
+            default -> (roll < 1) ? 1 : (roll < 25 ? 2 : 3);
         };
     }
 
