@@ -47,7 +47,6 @@ public class EffectPools {
         } else if (quality == 2) { // 2级池
             addRand(list, EffectAllocator.PROTECTED, 2, 3);
             addRand(list, EffectAllocator.POWERFUL, 2, 3);
-            addFixed(list, EffectAllocator.REGENERATING, 0);
             addRand(list, EffectAllocator.SPEEDY, 2, 3);
             addRand(list, EffectAllocator.POISONOUS, 0, 1);
             addRand(list, EffectAllocator.STRAY, 0, 1);

@@ -13,6 +13,7 @@ public class SpiderSpecial implements ISpecialElite {
         if (!(entity instanceof Spider spider)) return;
 
         spider.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 144000, 0, false, true));
+        spider.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 144000, 1, false, true));
 
         spider.getPersistentData().putBoolean(TAG_WEB_ATTACK, true);
     }

@@ -206,7 +206,7 @@ public class ModEvents {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHurt(LivingHurtEvent event) {
-        if (event.getAmount() <= 0 || event.getEntity().level().isClientSide) return;
+        if (event.getEntity().level().isClientSide) return;
 
         LivingEntity victim = event.getEntity();
         LivingEntity attacker = getAttacker(event.getSource().getEntity(), event.getSource().getDirectEntity());
@@ -231,7 +231,7 @@ public class ModEvents {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        if (event.getAmount() <= 0 || event.getEntity().level().isClientSide) return;
+        if (event.getEntity().level().isClientSide) return;
 
         LivingEntity victim = event.getEntity();
         LivingEntity attacker = getAttacker(event.getSource().getEntity(), event.getSource().getDirectEntity());
@@ -341,11 +341,11 @@ public class ModEvents {
         double originalMax = maxHealthAttr.getBaseValue();
 
         if (currentTime < effectEnd) {
-            float healAmount = (float) (originalMax * 0.01f);
+            float healAmount = (float) (originalMax * 0.01f) + 1.0f;
             entity.heal(healAmount);
             // 粒子反馈
             if (entity.level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 3, 0.2, 0.2, 0.2, 0.0);
+                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0.0);
             }
         } 
         else if (currentTime >= cooldownEnd && entity.getHealth() <= (originalMax * 0.3f)) {
