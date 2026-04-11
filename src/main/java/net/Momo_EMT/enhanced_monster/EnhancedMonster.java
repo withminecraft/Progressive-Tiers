@@ -1,16 +1,19 @@
 package net.Momo_EMT.enhanced_monster;
 
+import net.Momo_EMT.enhanced_monster.client.ClothConfigScreen;
 import net.Momo_EMT.enhanced_monster.capability.IMobTrait;
 import net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait; 
 import net.Momo_EMT.enhanced_monster.item.ModItems;
 import net.Momo_EMT.enhanced_monster.item.ModItemEvents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig.Type;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 
@@ -37,6 +40,11 @@ public class EnhancedMonster {
         modEventBus.addListener(this::onConfigReloading);
         
         modEventBus.addListener(this::registerCaps);
+
+        if (net.minecraftforge.fml.loading.FMLEnvironment.dist.isClient()) {
+            ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, 
+                () -> new ConfigScreenHandler.ConfigScreenFactory((mc, parent) -> ClothConfigScreen.create(parent)));
+        }
         
         int id = 0;
         CHANNEL.registerMessage(id++, 

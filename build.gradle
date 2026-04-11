@@ -133,6 +133,7 @@ dependencies {
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge-api:${jei_version}")
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
     compileOnly fg.deobf(files("libs/Jade-1.20.1-Forge-11.13.2.jar"))
+    compileOnly fg.deobf(files("libs/cloth-config-11.1.136-forge.jar"))
     compileOnly fg.deobf(files("libs/jei-1.20.1-forge-15.20.0.129.jar"))
     compileOnly fg.deobf(files("libs/L_Enders_Cataclysm-3.25.jar"))
 

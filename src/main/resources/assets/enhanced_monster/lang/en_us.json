@@ -12,6 +12,7 @@
   "trait.enhanced_monster.tanky": "Tanky",
   "trait.enhanced_monster.void": "Void",
   "trait.enhanced_monster.summoner": "Summoner",
+  "trait.enhanced_monster.withering": "Withering",
 
   "item.enhanced_monster.trait_powerful": "Trait: Powerful",
   "item.enhanced_monster.trait_regenerating": "Trait: Regen",
@@ -26,11 +27,33 @@
   "item.enhanced_monster.trait_tanky": "Trait: Tanky",
   "item.enhanced_monster.trait_void": "Trait: Void",
   "item.enhanced_monster.trait_summoner": "Trait: Summoner",
+  "item.enhanced_monster.trait_withering": "Trait: Withering",
 
-  "tooltip.enhanced_monster.empty_trait": "§8Empty Trait Data",
-  "tooltip.enhanced_monster.shift_to_use": "§dHold Shift to apply trait",
-  "chat.enhanced_monster.not_your_pet": "§cYou can only use this on your own pet!",
-  "chat.enhanced_monster.level_too_low": "§eItem level is too low to override existing trait.",
-  "chat.enhanced_monster.max_traits_reached": "§6Max trait limit reached (5/5).",
-  "chat.enhanced_monster.apply_success": "§aSuccessfully applied trait: %s %s"
+  "tooltip.enhanced_monster.empty_trait": "Empty Trait Data",
+  "tooltip.enhanced_monster.shift_to_use": "Hold Shift to apply trait",
+  "chat.enhanced_monster.not_your_pet": "You can only use this on your own pet!",
+  "chat.enhanced_monster.level_too_low": "Item level is too low to override existing trait.",
+  "chat.enhanced_monster.max_traits_reached": "Max trait limit reached (5/5).",
+  "chat.enhanced_monster.apply_success": "Successfully applied trait:%1$s %2$s",
+  "chat.enhanced_monster.clear_success": "Successfully cleared all traits from your pet!",
+
+  "title.enhanced_monster.config": "Progressive Tiers Configuration",
+  "category.enhanced_monster.general": "General Settings",
+  "category.enhanced_monster.lists": "Entity Lists",
+  "category.enhanced_monster.drops": "Extra Drops",
+  
+  "option.enhanced_monster.use_whitelist": "Use Whitelist Mode",
+  "option.enhanced_monster.enable_particles": "Enable Particle Effects",
+  "option.enhanced_monster.enable_glowing": "Enable Automatic Glowing",
+  "option.enhanced_monster.tier_1_limit": "Tier 1 Health Threshold",
+  "option.enhanced_monster.tier_2_limit": "Tier 2 Health Threshold",
+  
+  "option.enhanced_monster.blacklist": "Blacklist (Entity/Mod ID)",
+  "option.enhanced_monster.whitelist": "Whitelist (Entity/Mod ID)",
+  "option.enhanced_monster.boss_list": "Boss List",
+  "option.enhanced_monster.dimension_blacklist": "Dimension Blacklist",
+  
+  "option.enhanced_monster.quality_2_drops": "Quality 2 Extra Drops",
+  "option.enhanced_monster.quality_3_drops": "Quality 3 Extra Drops",
+  "option.enhanced_monster.boss_drops": "Boss Extra Drops"
 }

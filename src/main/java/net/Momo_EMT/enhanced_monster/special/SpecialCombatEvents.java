@@ -220,10 +220,12 @@ public static void onHuskAttack(LivingHurtEvent event) {
         }
 
         if (entity.getPersistentData().getBoolean(WitherSkeletonSpecial.TAG_DROP_IGNITIUM)) {
-            Item ignitiumIngot = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse("cataclysm:ignitium_ingot"));
-            if (ignitiumIngot != null) {
-                event.getDrops().add(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), 
-                    new ItemStack(ignitiumIngot)));
+            if (entity.level().getRandom().nextFloat() < 0.5f) {
+                Item ignitiumIngot = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse("cataclysm:ignitium_ingot"));
+                if (ignitiumIngot != null) {
+                    event.getDrops().add(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), 
+                        new ItemStack(ignitiumIngot)));
+                }
             }
         }
 

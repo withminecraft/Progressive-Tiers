@@ -19,6 +19,7 @@ public class TraitConfig {
         ITEM_ENABLED_TRAITS.put(EffectAllocator.WEAKENER, 2); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.BERSERK, 0); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.LIFESTEAL, 0); 
+        ITEM_ENABLED_TRAITS.put(EffectAllocator.WITHERING, 2);
     }
 
     public static boolean hasItem(String traitType) {
