@@ -344,16 +344,20 @@ public class ModEvents {
     private static void handleCustomRegen(LivingEntity entity) {
         CompoundTag data = entity.getPersistentData();
         long currentTime = entity.level().getGameTime();
+
+        if (!data.contains("EM_Initial_Max_Health")) {
+            data.putDouble("EM_Initial_Max_Health", entity.getMaxHealth());
+        }
+        double originalMax = data.getDouble("EM_Initial_Max_Health");
         
         long cooldownEnd = data.getLong("EM_Regen_CD");
         long effectEnd = data.getLong("EM_Regen_Active_End");
 
         var maxHealthAttr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         if (maxHealthAttr == null) return;
-        double originalMax = maxHealthAttr.getBaseValue();
 
         if (currentTime < effectEnd) {
-            float healAmount = (float) (originalMax * 0.01f) + 2.0f;
+            float healAmount = (float) (entity.getMaxHealth() * 0.015f) + 2.0f;
             entity.heal(healAmount);
             // 粒子反馈
             if (entity.level() instanceof ServerLevel sl) {
