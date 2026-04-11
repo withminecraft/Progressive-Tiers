@@ -26,6 +26,7 @@ public class EffectPools {
             addFixed(list, EffectAllocator.REGENERATING, 0);
             addFixed(list, EffectAllocator.STRAY, 2);
             addFixed(list, EffectAllocator.WEAKENER, 2);
+            addFixed(list, EffectAllocator.WITHERING, 2);
             addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addFixed(list, EffectAllocator.TANKY, 4);
@@ -52,6 +53,7 @@ public class EffectPools {
             addRand(list, EffectAllocator.POISONOUS, 0, 1);
             addRand(list, EffectAllocator.STRAY, 0, 1);
             addRand(list, EffectAllocator.WEAKENER, 0, 1);
+            addFixed(list, EffectAllocator.WITHERING, 0);
             addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addRand(list, EffectAllocator.TANKY, 1, 2);
@@ -64,6 +66,7 @@ public class EffectPools {
             addRand(list, EffectAllocator.POISONOUS, 1, 2);
             addRand(list, EffectAllocator.STRAY, 1, 2);
             addRand(list, EffectAllocator.WEAKENER, 1, 2);
+            addFixed(list, EffectAllocator.WITHERING, 1);
             addFixed(list, EffectAllocator.BERSERK, 0);
             addFixed(list, EffectAllocator.LIFESTEAL, 0);
             addRand(list, EffectAllocator.TANKY, 3, 4);

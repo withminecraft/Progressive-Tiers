@@ -42,6 +42,7 @@ public class EffectAllocator {
     public static final String TANKY = NBT_PREFIX + "tanky";
     public static final String VOID = NBT_PREFIX + "void";
     public static final String SUMMONER = NBT_PREFIX + "summoner";
+    public static final String WITHERING = NBT_PREFIX + "withering";
 
     public static void apply(LivingEntity entity) {
         if (entity.level().isClientSide) return;
@@ -198,6 +199,23 @@ public class EffectAllocator {
             safeApplyModifier(entity, Attributes.ARMOR_TOUGHNESS, TOUGHNESS_MODIFIER_ID, (level + 1) * 4.0, AttributeModifier.Operation.ADD_VALUE);
             safeApplyModifier(entity, Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_MODIFIER_ID, (level + 1) * 0.2, AttributeModifier.Operation.ADD_VALUE);
         }
+    }
+
+    public static void removeAllAttributeModifiers(LivingEntity entity) {
+        Map<net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute>, ResourceLocation> modifiersToRemove = Map.of(
+            Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_ID,
+            Attributes.MOVEMENT_SPEED, SPEED_MODIFIER_ID,
+            Attributes.ARMOR, ARMOR_MODIFIER_ID,
+            Attributes.ARMOR_TOUGHNESS, TOUGHNESS_MODIFIER_ID,
+            Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_MODIFIER_ID
+        );
+
+        modifiersToRemove.forEach((attr, id) -> {
+            AttributeInstance instance = entity.getAttribute(attr);
+            if (instance != null) {
+                instance.removeModifier(id);
+            }
+        });
     }
 
     private static void safeApplyModifier(LivingEntity entity, net.minecraft.core.Holder<net.minecraft.world.entity.ai.attributes.Attribute> attrType, ResourceLocation id, double value, AttributeModifier.Operation op) {

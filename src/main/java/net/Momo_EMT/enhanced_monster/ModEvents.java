@@ -217,10 +217,17 @@ public class ModEvents {
             }
 
             if (atkTraits.containsKey(EffectAllocator.VOID)) {
-                int level = atkTraits.get(EffectAllocator.VOID) + 1;
-                event.setNewDamage(event.getNewDamage() + (victim.getMaxHealth() * (level * 0.04f)));
-                if (attacker.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                long currentTime = attacker.level().getGameTime();
+                String tag = "void_cd";
+                long lastTriggered = attacker.getPersistentData().getLong(tag);
+
+                if (currentTime - lastTriggered >= 10) {
+                    int level = atkTraits.get(EffectAllocator.VOID) + 1;
+                    event.setNewDamage(event.getNewDamage() + (victim.getMaxHealth() * (level * 0.04f)));
+                    if (attacker.level() instanceof ServerLevel serverLevel) {
+                        serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                    }
+                    attacker.getPersistentData().putLong(tag, currentTime);
                 }
             }
         }
@@ -240,7 +247,7 @@ public class ModEvents {
             if (atkTraits.containsKey(EffectAllocator.POISONOUS)) {
                 int amp = atkTraits.get(EffectAllocator.POISONOUS);
                 victim.addEffect(new MobEffectInstance(MobEffects.POISON, 200, amp));
-                if (amp >= 2) victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, amp - 2));
+                if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, amp - 1));
             }
 
             if (atkTraits.containsKey(EffectAllocator.STRAY)) {
@@ -250,6 +257,10 @@ public class ModEvents {
 
             if (atkTraits.containsKey(EffectAllocator.WEAKENER)) {
                 victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, atkTraits.get(EffectAllocator.WEAKENER)));
+            }
+
+            if (atkTraits.containsKey(EffectAllocator.WITHERING)) {
+                victim.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, atkTraits.get(EffectAllocator.WITHERING)));
             }
         }
     }
@@ -307,7 +318,7 @@ public class ModEvents {
         double baseMax = maxHealthInstance.getBaseValue();
 
         if (currentTime < effectEnd) {
-            entity.heal((float) (baseMax * 0.01f) + 1.0f);
+            entity.heal((float) (baseMax * 0.01f) + 2.0f);
             if (entity.level() instanceof ServerLevel sl) {
                 sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0.0);
             }

@@ -215,10 +215,12 @@ public class SpecialCombatEvents {
         }
 
         if (entity.getPersistentData().getBoolean(WitherSkeletonSpecial.TAG_DROP_IGNITIUM)) {
-            Item ignitiumIngot = BuiltInRegistries.ITEM.get(ResourceLocation.parse("cataclysm:ignitium_ingot"));
-            if (ignitiumIngot != Items.AIR) { 
-                event.getDrops().add(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), 
-                    new ItemStack(ignitiumIngot)));
+            if (entity.getRandom().nextFloat() < 0.5f) {
+                Item ignitiumIngot = BuiltInRegistries.ITEM.get(ResourceLocation.parse("cataclysm:ignitium_ingot"));
+                if (ignitiumIngot != Items.AIR) { 
+                    event.getDrops().add(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), 
+                        new ItemStack(ignitiumIngot)));
+                }
             }
         }
 

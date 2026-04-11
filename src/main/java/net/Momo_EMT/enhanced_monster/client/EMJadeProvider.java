@@ -67,6 +67,7 @@ public enum EMJadeProvider implements IEntityComponentProvider, IServerDataProvi
             case EffectAllocator.TANKY -> 0x999999;
             case EffectAllocator.VOID -> 0x7000FF;
             case EffectAllocator.SUMMONER -> 0x9370DB;
+            case EffectAllocator.WITHERING -> 0x3E2723;
             default -> 0xFFFFFF;
         };
     }

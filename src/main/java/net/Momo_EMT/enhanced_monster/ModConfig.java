@@ -99,10 +99,10 @@ public class ModConfig {
                 .defineList("quality_2_extra_drops", Collections.emptyList(), obj -> obj instanceof String);
 
         QUALITY_3_EXTRA_DROPS = BUILDER.comment("品级3的额外掉落列表。", dropExample)
-                .defineList("quality_3_extra_drops", List.of("minecraft:golden_apple,2,3,0.8"), obj -> obj instanceof String);
+                .defineList("quality_3_extra_drops", List.of("minecraft:golden_apple,2,3,1.0"), obj -> obj instanceof String);
 
         BOSS_EXTRA_DROPS = BUILDER.comment("BOSS 品级的额外掉落列表。", dropExample)
-                .defineList("boss_extra_drops", List.of("minecraft:netherite_scrap,1,2,1.0", "minecraft:diamond,4,9,0.8"), obj -> obj instanceof String);
+                .defineList("boss_extra_drops", List.of("minecraft:enchanted_golden_apple,2,3,1.0", "minecraft:diamond,4,9,0.8"), obj -> obj instanceof String);
         BUILDER.pop();
 
         BUILDER.pop();
