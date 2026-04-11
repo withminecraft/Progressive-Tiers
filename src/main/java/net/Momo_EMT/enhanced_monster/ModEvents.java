@@ -309,26 +309,30 @@ public class ModEvents {
     private static void handleCustomRegen(LivingEntity entity) {
         CompoundTag nbt = entity.getPersistentData();
         long currentTime = entity.level().getGameTime();
+
+        if (!nbt.contains("EM_Initial_Max_Health")) {
+            nbt.putDouble("EM_Initial_Max_Health", entity.getMaxHealth());
+        }
+        double originalMax = nbt.getDouble("EM_Initial_Max_Health");
         
         long cooldownEnd = nbt.getLong("EM_Regen_CD");
         long effectEnd = nbt.getLong("EM_Regen_Active_End");
 
         var maxHealthInstance = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         if (maxHealthInstance == null) return;
-        double baseMax = maxHealthInstance.getBaseValue();
 
         if (currentTime < effectEnd) {
-            entity.heal((float) (baseMax * 0.01f) + 2.0f);
+            entity.heal((float) (entity.getMaxHealth() * 0.015f) + 2.0f);
             if (entity.level() instanceof ServerLevel sl) {
                 sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0.0);
             }
         } 
-        else if (currentTime >= cooldownEnd && entity.getHealth() <= (float) (baseMax * 0.3f)) {
+        else if (currentTime >= cooldownEnd && entity.getHealth() <= (float) (originalMax * 0.3f)) {
             
             nbt.putLong("EM_Regen_Active_End", currentTime + 600);
             nbt.putLong("EM_Regen_CD", currentTime + 1200);
 
-            if (entity.getMaxHealth() > baseMax * 0.41) {
+            if (entity.getMaxHealth() > originalMax * 0.41) {
                 double currentPenalty = 0;
                 var existingMod = maxHealthInstance.getModifier(REGEN_PENALTY_ID);
                 if (existingMod != null) {
@@ -338,7 +342,7 @@ public class ModEvents {
 
                 maxHealthInstance.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
                         REGEN_PENALTY_ID, 
-                        currentPenalty - (baseMax * 0.2), 
+                        currentPenalty - (originalMax * 0.2), 
                         net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
                 
                 if (entity.getHealth() > entity.getMaxHealth()) {
