@@ -24,7 +24,7 @@ license="${mod_license}"
 modId="enhanced_monster" 
 
 # The version number of the mod
-version="2.8" 
+version="3.0" 
 
 # A display name for the mod
 displayName="Progressive Tiers" 

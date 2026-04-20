@@ -67,8 +67,7 @@ public class ModConfig {
         ).defineList("boss_list", List.of(
                 "minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", 
                 "cataclysm:the_leviathan", "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "irons_spellbooks:fire_boss", 
-                "mowziesmobs:ferrous_wroughtnaut", "mowziesmobs:frostmaw", "mowziesmobs:umvuthi", "spore:sieger", "spore:gazenbreacher", "spore:hindenburg", "spore:howitzer", 
-                "spore:hohlfresser", "spore:kraken", "spore:stahl"
+                "mowziesmobs:ferrous_wroughtnaut", "mowziesmobs:frostmaw", "mowziesmobs:umvuthi"
         ), obj -> obj instanceof String);
 
         TIER_1_LIMIT = BUILDER.comment(

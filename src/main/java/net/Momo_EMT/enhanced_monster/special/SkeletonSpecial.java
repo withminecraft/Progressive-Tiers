@@ -50,6 +50,8 @@ public class SkeletonSpecial implements ISpecialElite {
             horse.setTamed(true);
             horse.getPersistentData().putBoolean(TAG_REDIRECT, true);
 
+            horse.getPersistentData().putLong(SpecialHorseHandler.TAG_SPAWN_TICK, skeleton.level().getGameTime());
+
             skeleton.level().addFreshEntity(horse);
             skeleton.startRiding(horse);
         }
