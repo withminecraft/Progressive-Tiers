@@ -36,6 +36,8 @@ public class ZombieSpecial implements ISpecialElite {
             horse.setTamed(true); 
             horse.getPersistentData().putBoolean(TAG_REDIRECT, true); 
 
+            horse.getPersistentData().putLong("em_special_spawn_tick", zombie.level().getGameTime());
+
             zombie.level().addFreshEntity(horse);
             zombie.startRiding(horse);
         }

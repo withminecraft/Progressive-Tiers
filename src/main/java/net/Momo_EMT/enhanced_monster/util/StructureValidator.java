@@ -1,9 +1,11 @@
 package net.Momo_EMT.enhanced_monster.util;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
@@ -15,7 +17,13 @@ public class StructureValidator {
         "fortress", Set.of("minecraft:wither_skeleton"),
         "bastion_remnant", Set.of("minecraft:piglin", "minecraft:piglin_brute"),
         "mansion", Set.of("minecraft:vindicator", "minecraft:evoker"),
-        "stronghold", Set.of("minecraft:creeper", "minecraft:spider")
+        "stronghold", Set.of("minecraft:creeper", "minecraft:spider"),
+        "shelter", Set.of("minecraft:vindicator", "minecraft:evoker"),
+        "wind_shrine", Set.of("minecraft:ravager", "goety:crusher", "goety:storm_caster"),
+        "ominous_blacksmith", Set.of("minecraft:ravager", "goety:crusher", "goety:storm_caster"),
+        "dark_manor", Set.of("minecraft:vindicator", "minecraft:witch", "minecraft:illusioner", "goety:piker"),
+        "sorcerous_keep", Set.of("goety:sorcerer"),
+        "crypt", Set.of("goety:cairn_necromancer")
     );
 
     public static boolean isEntityInSpecialStructure(LivingEntity entity) {
@@ -36,13 +44,17 @@ public class StructureValidator {
     }
 
     private static boolean isInsideFlexibleStructure(ServerLevel level, LivingEntity entity, String keyword) {
+        BlockPos pos = entity.blockPosition();
+        var structuresAt = level.structureManager().getAllStructuresAt(pos);
+
+        if (structuresAt.isEmpty()) return false;
+
         var registry = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
-        
-        for (var entry : registry.entrySet()) {
-            String currentStructureId = entry.getKey().location().toString();
-            
-            if (currentStructureId.contains(keyword)) {
-                if (level.structureManager().getStructureAt(entity.blockPosition(), entry.getValue()).isValid()) {
+
+        for (Structure structure : structuresAt.keySet()) {
+            if (level.structureManager().getStructureAt(pos, structure).isValid()) {
+                ResourceLocation id = registry.getKey(structure);
+                if (id != null && id.toString().contains(keyword)) {
                     return true;
                 }
             }
