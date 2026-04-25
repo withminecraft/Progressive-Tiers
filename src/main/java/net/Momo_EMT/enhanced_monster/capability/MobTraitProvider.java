@@ -14,7 +14,6 @@ public class MobTraitProvider implements ICapabilitySerializable<CompoundTag> {
     public static Capability<IMobTrait> MOB_TRAIT = CapabilityManager.get(new CapabilityToken<>() {});
 
     private final IMobTrait instance = new MobTrait();
-    private final MobTraitStorage storage = new MobTraitStorage(instance);
     private final LazyOptional<IMobTrait> handler = LazyOptional.of(() -> instance);
 
     @Override
@@ -24,11 +23,11 @@ public class MobTraitProvider implements ICapabilitySerializable<CompoundTag> {
 
     @Override
     public CompoundTag serializeNBT() {
-        return storage.serializeNBT();
+        return instance.serializeNBT();
     }
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
-        storage.deserializeNBT(nbt);
+        instance.deserializeNBT(nbt);
     }
 }

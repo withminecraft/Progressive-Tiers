@@ -24,7 +24,6 @@ public class EffectPools {
             addFixed(list, EffectAllocator.PROTECTED, 5); // 保护 VI
             addFixed(list, EffectAllocator.POWERFUL, 5);  // 强力 VI
             addFixed(list, EffectAllocator.REGENERATING, 0);
-            addFixed(list, EffectAllocator.STRAY, 2);
             addFixed(list, EffectAllocator.WEAKENER, 2);
             addFixed(list, EffectAllocator.WITHERING, 2);
             addFixed(list, EffectAllocator.BERSERK, 0);

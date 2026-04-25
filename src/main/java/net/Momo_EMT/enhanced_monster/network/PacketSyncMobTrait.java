@@ -33,11 +33,6 @@ public class PacketSyncMobTrait {
             if (Minecraft.getInstance().level != null) {
                 Entity entity = Minecraft.getInstance().level.getEntity(msg.entityId);
                 if (entity != null) {
-                    CompoundTag nbt = entity.getPersistentData();
-                    nbt.put("EM_SyncData", msg.tag); 
-                    nbt.putInt(EffectAllocator.TAG_QUALITY, msg.tag.getInt("Quality"));
-                    nbt.putBoolean("IsBoss", msg.tag.getBoolean("IsBoss"));
-
                     entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
                         cap.deserializeNBT(msg.tag);
                     });

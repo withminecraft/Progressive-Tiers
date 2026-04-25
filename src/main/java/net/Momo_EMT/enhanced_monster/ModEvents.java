@@ -214,7 +214,22 @@ public class ModEvents {
 
         if (attacker != null && attacker.isAlive()) {
             attacker.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(atkCap -> {
-                if (atkCap.getTraits().containsKey(EffectAllocator.BERSERK)) {
+                Map<String, Integer> atkTraits = atkCap.getTraits();
+                
+                if (atkTraits.containsKey(EffectAllocator.POWERFUL)) {
+                    boolean isEnhanced = event.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO)
+                          || event.getSource().is(DamageTypeTags.IS_PROJECTILE)
+                          || event.getSource().is(DamageTypeTags.IS_EXPLOSION)
+                          || event.getSource().is(DamageTypeTags.IS_FIRE)
+                          || event.getSource().is(DamageTypeTags.IS_FREEZING)
+                          || event.getSource().is(DamageTypeTags.IS_LIGHTNING);
+                    if (isEnhanced) {
+                        int level = atkTraits.get(EffectAllocator.POWERFUL) + 1;
+                        damage[0] = damage[0] * (1.0f + (level * 0.05f));
+                    }
+                }
+
+                if (atkTraits.containsKey(EffectAllocator.BERSERK)) {
                     damage[0] = damage[0] * 1.5f; 
                     
                     if (attacker.level() instanceof ServerLevel serverLevel) {
@@ -240,7 +255,7 @@ public class ModEvents {
             Map<String, Integer> traits = cap.getTraits();
             if (traits.containsKey(EffectAllocator.PROTECTED)) {
                 int level = traits.get(EffectAllocator.PROTECTED) + 1;
-                float reduction = Math.max(0.1f, 1.0f - (level * 0.1f));
+                float reduction = Math.max(0.0f, 1.0f - (level * 0.1f));
                 event.setAmount(event.getAmount() * reduction);
             }
         });
@@ -259,33 +274,39 @@ public class ModEvents {
 
                 // 新增：VOID (虚无) 效果
                 if (traits.containsKey(EffectAllocator.VOID)) {
-                    long currentTime = attacker.level().getGameTime();
-                    String tag = "void_cd";
-                    long lastTriggered = attacker.getPersistentData().getLong(tag);
+                    attacker.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(vCap -> {
+                        long currentTime = attacker.level().getGameTime();
+                        
+                        long lastTriggered = vCap.getVoidCooldown();
 
-                    if (currentTime - lastTriggered >= 10) {
-                        int level = traits.get(EffectAllocator.VOID) + 1;
-                        float voidExtraDamage = victim.getMaxHealth() * (level * 0.04f);
-                        event.setAmount(event.getAmount() + voidExtraDamage);
-                        if (attacker.level() instanceof ServerLevel serverLevel) {
-                            serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                        if (currentTime - lastTriggered >= 10) {
+                            int level = traits.get(EffectAllocator.VOID) + 1;
+                            float voidExtraDamage = victim.getMaxHealth() * (level * 0.04f);
+                            event.setAmount(event.getAmount() + voidExtraDamage);
+
+                            if (attacker.level() instanceof ServerLevel serverLevel) {
+                                serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                            }
+
+                            vCap.setVoidCooldown(currentTime);
+                            
+                            if (attacker instanceof Mob mob && !attacker.level().isClientSide) {
+                                syncAndSave(mob, vCap); 
+                            }
                         }
-                        attacker.getPersistentData().putLong(tag, currentTime);
-                    }
+                    });
                 }
 
                 if (traits.containsKey(EffectAllocator.POISONOUS)) {
                     int amp = traits.get(EffectAllocator.POISONOUS);
                     victim.addEffect(new MobEffectInstance(MobEffects.POISON, 200, amp));
-                    if (amp >= 1) { 
-                        victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, amp - 1));
-                    }
+                    if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, amp - 1));
                 }
 
                 if (traits.containsKey(EffectAllocator.STRAY)) {
                     int amp = traits.get(EffectAllocator.STRAY);
-                    victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, amp));
                     victim.setTicksFrozen(400);
+                    if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, amp - 1));
                 }
 
                 if (traits.containsKey(EffectAllocator.WEAKENER)) {
@@ -312,15 +333,15 @@ public class ModEvents {
         LivingEntity entity = event.getEntity();
         
         if (entity.level().isClientSide) {
-            CompoundTag nbt = entity.getPersistentData();
-            if (nbt.contains(EffectAllocator.TAG_QUALITY)) {
-                int quality = nbt.getInt(EffectAllocator.TAG_QUALITY);
-                boolean isBoss = nbt.getBoolean("IsBoss");
+            entity.getCapability(net.Momo_EMT.enhanced_monster.capability.MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
+                int quality = cap.getQuality();
+                boolean isBoss = cap.isBoss();
+
                 if (quality >= 2 || isBoss) {
                     net.Momo_EMT.enhanced_monster.client.ClientParticles.spawnParticles(entity, quality, isBoss);
                 }
-            }
-            return; 
+            });
+            return;
         }
 
         if (entity.isAlive() && entity.tickCount % 20 == 0) {
@@ -342,50 +363,59 @@ public class ModEvents {
     }
 
     private static void handleCustomRegen(LivingEntity entity) {
-        CompoundTag data = entity.getPersistentData();
-        long currentTime = entity.level().getGameTime();
+        entity.getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
+            long currentTime = entity.level().getGameTime();
 
-        if (!data.contains("EM_Initial_Max_Health")) {
-            data.putDouble("EM_Initial_Max_Health", entity.getMaxHealth());
-        }
-        double originalMax = data.getDouble("EM_Initial_Max_Health");
-        
-        long cooldownEnd = data.getLong("EM_Regen_CD");
-        long effectEnd = data.getLong("EM_Regen_Active_End");
-
-        var maxHealthAttr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
-        if (maxHealthAttr == null) return;
-
-        if (currentTime < effectEnd) {
-            float healAmount = (float) (entity.getMaxHealth() * 0.015f) + 2.0f;
-            entity.heal(healAmount);
-            // 粒子反馈
-            if (entity.level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0.0);
+            if (cap.getRegenInitialMaxHealth() <= 0) {
+                cap.setRegenInitialMaxHealth(entity.getMaxHealth());
             }
-        } 
-        else if (currentTime >= cooldownEnd && entity.getHealth() <= (originalMax * 0.3f)) {
+            double originalMax = cap.getRegenInitialMaxHealth();
             
-            data.putLong("EM_Regen_Active_End", currentTime + 600);
-            data.putLong("EM_Regen_CD", currentTime + 1200);
+            long cooldownEnd = cap.getRegenCooldown();
+            long effectEnd = cap.getRegenActiveEnd();
 
-            if (entity.getMaxHealth() > originalMax * 0.41) {
-                double currentModifier = 0;
-                var oldMod = maxHealthAttr.getModifier(REGEN_DEBUFF_UUID);
-                if (oldMod != null) {
-                    currentModifier = oldMod.getAmount();
-                    maxHealthAttr.removeModifier(REGEN_DEBUFF_UUID);
+            var maxHealthAttr = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            if (maxHealthAttr == null) return;
+
+            if (currentTime < effectEnd) {
+                float healAmount = (float) (entity.getMaxHealth() * 0.015f) + 2.0f;
+                entity.heal(healAmount);
+                if (entity.level() instanceof ServerLevel sl) {
+                    sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0.0);
                 }
+            } 
+            else if (currentTime >= cooldownEnd && entity.getHealth() <= (originalMax * 0.3f)) {
                 
-                maxHealthAttr.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
-                        REGEN_DEBUFF_UUID, "Regen Penalty", currentModifier - (originalMax * 0.2), 
-                        net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
-                
-                if (entity.getHealth() > entity.getMaxHealth()) {
-                    entity.setHealth(entity.getMaxHealth());
+                cap.setRegenActiveEnd(currentTime + 600);
+                cap.setRegenCooldown(currentTime + 1200);
+
+                if (entity.getMaxHealth() > originalMax * 0.41) {
+                    double currentModifier = 0;
+                    var oldMod = maxHealthAttr.getModifier(REGEN_DEBUFF_UUID);
+                    if (oldMod != null) {
+                        currentModifier = oldMod.getAmount();
+                        maxHealthAttr.removeModifier(REGEN_DEBUFF_UUID);
+                    }
+                    
+                    maxHealthAttr.addPermanentModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                            REGEN_DEBUFF_UUID, "Regen Penalty", currentModifier - (originalMax * 0.2), 
+                            net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADDITION));
+                    
+                    if (entity.getHealth() > entity.getMaxHealth()) {
+                        entity.setHealth(entity.getMaxHealth());
+                    }
+                }
+
+                if (entity instanceof Mob mob && !entity.level().isClientSide) {
+                    syncAndSave(mob, cap); 
                 }
             }
-        }
+        });
+    }
+
+    private static void syncAndSave(LivingEntity entity, IMobTrait cap) {
+        EnhancedMonster.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
+                new PacketSyncMobTrait(entity.getId(), cap.serializeNBT()));
     }
 
     private static void spawnSummons(LivingEntity parent) {

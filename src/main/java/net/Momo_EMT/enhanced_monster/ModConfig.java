@@ -23,7 +23,6 @@ public class ModConfig {
     public static final ForgeConfigSpec.DoubleValue TIER_2_LIMIT;
     
     public static final ForgeConfigSpec.BooleanValue ENABLE_PARTICLES;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_GLOWING;
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> QUALITY_2_EXTRA_DROPS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> QUALITY_3_EXTRA_DROPS;
@@ -50,8 +49,7 @@ public class ModConfig {
         "irons_spellbooks:summoned_sword", "irons_spellbooks:summoned_claymore", "irons_spellbooks:summoned_rapier", "illageandspillage:hinder", "illageandspillage:chagrin_sentry", 
         "illageandspillage:factory", "illageandspillage:faker", "illageandspillage:kaboomer", "illageandspillage:crashager", "illageandspillage:mob_spirit", "illageandspillage:imp", 
         "illageandspillage:spirit_hand", "illageandspillage:illager_soul", "illageandspillage:freakager", "goety:tormentor", "revelationfix:apostle_servant", "revelationfix:heretic_servant", 
-        "revelationfix:maverick_servant", "revelationfix:wither_servant", "revelationfix:phantom_servant", "revelationfix:apollyon", "alexsmobs:murmur_head", "alexsmobs:enderiophage", 
-        "alexsmobs:void_worm"), obj -> obj instanceof String);
+        "revelationfix:maverick_servant", "revelationfix:wither_servant", "revelationfix:phantom_servant", "alexsmobs:murmur_head", "alexsmobs:enderiophage", "alexsmobs:void_worm"), obj -> obj instanceof String);
 
         DIMENSION_BLACKLIST = BUILDER.comment(
                 "维度黑名单：填入维度ID（如 minecraft:the_nether）。在这些维度生成的生物不会被强化。",
@@ -64,13 +62,13 @@ public class ModConfig {
         ).defineList("whitelist", Collections.emptyList(), obj -> obj instanceof String);
 
         BOSS_LIST = BUILDER.comment(
-                "BOSS名单：百分百获得5个高级效果并发光。",
-                "Boss List: Entities in this list will always receive 5 high-tier effects and the Glowing effect."
+                "BOSS名单：百分百获得6个高级效果。",
+                "Boss List: Entities in this list will always receive 6 high-tier effects."
         ).defineList("boss_list", List.of("minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", 
         "cataclysm:the_leviathan", "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "irons_spellbooks:fire_boss", "mowziesmobs:ferrous_wroughtnaut", 
         "mowziesmobs:frostmaw", "mowziesmobs:umvuthi", "illageandspillage:magispeller", "illageandspillage:spiritcaller", "illageandspillage:ragno", "goety:apostle", "goety:vizier", 
         "goety:hostile_redstone_monstrosity", "goety:ender_keeper", "aquamirae:captain_cornelia", "alexscaves:luxtructosaurus", "legendary_monsters:cloud_golem", "legendary_monsters:the_obliterator", 
-        "eeeabsmobs:nameless_guardian", "eeeabsmobs:immortal"), obj -> obj instanceof String);
+        "eeeabsmobs:nameless_guardian", "eeeabsmobs:immortal", "goetyawaken:hostile_mushroom_monstrosity", "goetyawaken:nameless_one"), obj -> obj instanceof String);
 
         TIER_1_LIMIT = BUILDER.comment(
                 "第一梯度上限血量（默认40）。血量超过此值的生物将被视为第二梯度。",
@@ -86,11 +84,6 @@ public class ModConfig {
                 "是否开启精英怪/BOSS的粒子特效（仅视觉）。",
                 "Enable/Disable visual particle effects for Elite/Boss mobs."
         ).define("enable_particles", true);
-
-        ENABLE_GLOWING = BUILDER.comment(
-                "是否开启精英怪/BOSS的自动发光效果。",
-                "Enable/Disable automatic Glowing effect for Elite/Boss mobs."
-        ).define("enable_glowing", false);
 
         BUILDER.push("Extra Drops");
         String dropExample = "格式: \"物品ID,最小数量,最大数量,掉落概率(0-1)\"。例如: \"minecraft:diamond,1,2,0.5\" 代表50%几率掉落1-2个钻石。";

@@ -71,7 +71,7 @@ public class EffectAllocator {
 
             if (isMobBoss) {
                 quality = 3;
-                count = 5;
+                count = 6;
                 giveEffects(entity, count, quality, true, cap);
             } 
             else if (isEntityInSpecialStructure(entity)) {
@@ -109,13 +109,8 @@ public class EffectAllocator {
     }
 
     private static void syncAndSave(LivingEntity entity, IMobTrait cap) {
-        CompoundTag persistent = entity.getPersistentData();
-        persistent.putInt(TAG_QUALITY, cap.getQuality());
-        persistent.putBoolean("IsBoss", cap.isBoss());
-
-        CompoundTag syncTag = cap.serializeNBT();
         EnhancedMonster.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),
-                new PacketSyncMobTrait(entity.getId(), syncTag));
+                new PacketSyncMobTrait(entity.getId(), cap.serializeNBT()));
     }
 
     private static void adjustHealth(LivingEntity entity, int quality) {
@@ -164,9 +159,9 @@ public class EffectAllocator {
     private static int getCountForQuality(int quality) {
         int roll = RANDOM.nextInt(100);
         return switch (quality) {
-            case 1 -> (roll < 70) ? 0 : 1;
-            case 2 -> (roll < 70) ? 2 : 3;
-            case 3 -> (roll < 70) ? 4 : 5;
+            case 1 -> (roll < 60) ? 0 : (roll < 90 ? 1 : 2);
+            case 2 -> (roll < 70) ? 3 : 4;
+            case 3 -> (roll < 70) ? 5 : 6;
             default -> 0;
         };
     }
@@ -175,6 +170,9 @@ public class EffectAllocator {
         List<EffectPools.EffectEntry> pool = new ArrayList<>(EffectPools.getPool(quality, isBoss(entity)));
         Collections.shuffle(pool);
 
+        var resourceLocation = net.minecraftforge.registries.ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
+        String entityId = resourceLocation != null ? resourceLocation.toString() : "";
+
         int applied = 0;
         for (EffectPools.EffectEntry entry : pool) {
             if (applied >= count) break;
@@ -182,16 +180,14 @@ public class EffectAllocator {
             String effectTag = entry.tagName;
             int level = entry.level;
 
+            if (isTraitDisabledForEntity(entityId, effectTag)) continue;
+
             boolean incompatible = cap.getTraits().keySet().stream().anyMatch(existing -> isIncompatible(effectTag, existing));
             if (incompatible) continue;
 
             cap.addTrait(effectTag, level);
             applyImmediateAttributes(entity, effectTag, level);
             applied++;
-        }
-
-        if (shouldGlow && ModConfig.ENABLE_GLOWING.get()) {
-            entity.setGlowingTag(true);
         }
     }
 
@@ -260,6 +256,21 @@ public class EffectAllocator {
     private static boolean isBoss(LivingEntity entity) {
         var resourceLocation = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
         return resourceLocation != null && ModConfig.CACHED_BOSS_LIST.contains(resourceLocation.toString());
+    }
+
+    private static boolean isTraitDisabledForEntity(String entityId, String traitTag) {
+        if (REGENERATING.equals(traitTag)) {
+            return "goety:apostle".equals(entityId) 
+                || "goetyawaken:hostile_mushroom_monstrosity".equals(entityId) 
+                || "goetyawaken:nameless_one".equals(entityId);
+        }
+        if (VOID.equals(traitTag)) {
+            return "goety:apostle".equals(entityId) 
+                || "goetyawaken:hostile_mushroom_monstrosity".equals(entityId) 
+                || "goetyawaken:nameless_one".equals(entityId);
+        }
+        
+        return false;
     }
 
     private static boolean isIncompatible(String trait1, String trait2) {

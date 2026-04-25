@@ -28,18 +28,16 @@ public enum EMJadeProvider implements IEntityComponentProvider, IServerDataProvi
 
     @Override
     public void appendTooltip(ITooltip tooltip, EntityAccessor accessor, IPluginConfig config) {
-        CompoundTag nbt = accessor.getEntity().getPersistentData();
-        
-        if (nbt.contains("EM_SyncData")) {
-            CompoundTag syncData = nbt.getCompound("EM_SyncData");
-            if (syncData.contains("Traits")) {
-                CompoundTag traitsTag = syncData.getCompound("Traits");
-                
+        accessor.getEntity().getCapability(MobTraitProvider.MOB_TRAIT).ifPresent(cap -> {
+            Map<String, Integer> traits = cap.getTraits();
+            
+            if (!traits.isEmpty()) {
                 List<Component> entries = new ArrayList<>();
-                for (String key : traitsTag.getAllKeys()) {
-                    entries.add(buildStyledEntry(key, traitsTag.getInt(key)));
-                }
                 
+                traits.forEach((key, level) -> {
+                    entries.add(buildStyledEntry(key, level));
+                });
+
                 for (int i = 0; i < entries.size(); i += 2) {
                     MutableComponent line = entries.get(i).copy(); 
                     
@@ -50,7 +48,7 @@ public enum EMJadeProvider implements IEntityComponentProvider, IServerDataProvi
                     tooltip.add(line);
                 }
             }
-        }
+        });
     }
 
     @Override

@@ -10,6 +10,12 @@ public class MobTrait implements IMobTrait {
     private boolean processed = false;
     private boolean isBoss = false;
 
+    private double regenInitialMaxHealth = 0;
+    private long regenCooldown = 0;
+    private long regenActiveEnd = 0;
+
+    private long voidCooldown = 0;
+
     @Override
     public void addTrait(String tag, int level) {
         this.traits.put(tag, level);
@@ -29,6 +35,18 @@ public class MobTrait implements IMobTrait {
     @Override public boolean isBoss() { return isBoss; }
     @Override public void setBoss(boolean isBoss) { this.isBoss = isBoss; }
 
+    @Override public double getRegenInitialMaxHealth() { return regenInitialMaxHealth; }
+    @Override public void setRegenInitialMaxHealth(double health) { this.regenInitialMaxHealth = health; }
+
+    @Override public long getRegenCooldown() { return regenCooldown; }
+    @Override public void setRegenCooldown(long time) { this.regenCooldown = time; }
+
+    @Override public long getRegenActiveEnd() { return regenActiveEnd; }
+    @Override public void setRegenActiveEnd(long time) { this.regenActiveEnd = time; }
+
+    @Override public long getVoidCooldown() { return voidCooldown; }
+    @Override public void setVoidCooldown(long time) { this.voidCooldown = time; }
+
 
     @Override
     public CompoundTag serializeNBT() {
@@ -36,6 +54,12 @@ public class MobTrait implements IMobTrait {
         nbt.putInt("Quality", this.quality);
         nbt.putBoolean("Processed", this.processed);
         nbt.putBoolean("IsBoss", this.isBoss);
+
+        nbt.putDouble("RegenInitialMaxHealth", this.regenInitialMaxHealth);
+        nbt.putLong("RegenCooldown", this.regenCooldown);
+        nbt.putLong("RegenActiveEnd", this.regenActiveEnd);
+
+        nbt.putLong("VoidCooldown", this.voidCooldown);
         
         CompoundTag traitsTag = new CompoundTag();
         this.traits.forEach(traitsTag::putInt);
@@ -49,6 +73,12 @@ public class MobTrait implements IMobTrait {
         this.quality = nbt.getInt("Quality");
         this.processed = nbt.getBoolean("Processed");
         this.isBoss = nbt.getBoolean("IsBoss");
+
+        this.regenInitialMaxHealth = nbt.getDouble("RegenInitialMaxHealth");
+        this.regenCooldown = nbt.getLong("RegenCooldown");
+        this.regenActiveEnd = nbt.getLong("RegenActiveEnd");
+
+        this.voidCooldown = nbt.getLong("VoidCooldown");
         
         this.traits.clear();
         if (nbt.contains("Traits")) {

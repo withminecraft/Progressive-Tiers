@@ -18,6 +18,18 @@ public interface IMobTrait extends INBTSerializable<CompoundTag> {
     boolean isBoss();
     void setBoss(boolean isBoss);
 
+    double getRegenInitialMaxHealth();
+    void setRegenInitialMaxHealth(double health);
+
+    long getRegenCooldown();
+    void setRegenCooldown(long time);
+
+    long getRegenActiveEnd();
+    void setRegenActiveEnd(long time);
+
+    long getVoidCooldown();
+    void setVoidCooldown(long time);
+
     @Override
     CompoundTag serializeNBT();
 
