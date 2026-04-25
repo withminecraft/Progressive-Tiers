@@ -33,7 +33,7 @@
   "tooltip.enhanced_monster.shift_to_use": "Hold Shift to apply trait",
   "chat.enhanced_monster.not_your_pet": "You can only use this on your own pet!",
   "chat.enhanced_monster.level_too_low": "Item level is too low to override existing trait.",
-  "chat.enhanced_monster.max_traits_reached": "Max trait limit reached (5/5).",
+  "chat.enhanced_monster.max_traits_reached": "Max trait limit reached (6/6).",
   "chat.enhanced_monster.apply_success": "Successfully applied trait:%1$s %2$s",
   "chat.enhanced_monster.clear_success": "Successfully cleared all traits from your pet!",
 

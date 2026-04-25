@@ -1,7 +1,7 @@
 {
-  "trait.enhanced_monster.powerful": "强力",
+  "trait.enhanced_monster.powerful": "超限",
   "trait.enhanced_monster.regenerating": "再生",
-  "trait.enhanced_monster.speedy": "神速",
+  "trait.enhanced_monster.speedy": "极速",
   "trait.enhanced_monster.protected": "保护",
   "trait.enhanced_monster.fire_prot": "阻燃",
   "trait.enhanced_monster.poisonous": "剧毒",
@@ -14,9 +14,9 @@
   "trait.enhanced_monster.summoner": "召唤",
   "trait.enhanced_monster.withering": "凋零",
 
-  "item.enhanced_monster.trait_powerful": "能力词条：强力",
+  "item.enhanced_monster.trait_powerful": "能力词条：超限",
   "item.enhanced_monster.trait_regenerating": "能力词条：再生",
-  "item.enhanced_monster.trait_speedy": "能力词条：神速",
+  "item.enhanced_monster.trait_speedy": "能力词条：极速",
   "item.enhanced_monster.trait_protected": "能力词条：保护",
   "item.enhanced_monster.trait_fire_prot": "能力词条：阻燃",
   "item.enhanced_monster.trait_poisonous": "能力词条：剧毒",
@@ -33,7 +33,7 @@
   "tooltip.enhanced_monster.shift_to_use": "按住 Shift 以应用词条",
   "chat.enhanced_monster.not_your_pet": "你只能对自己的宠物使用此物品！",
   "chat.enhanced_monster.level_too_low": "物品等级不足以覆盖宠物已有的词条等级。",
-  "chat.enhanced_monster.max_traits_reached": "该生物的词条数量已达上限 (5/5)。",
+  "chat.enhanced_monster.max_traits_reached": "该生物的词条数量已达上限 (6/6)。",
   "chat.enhanced_monster.apply_success": "成功应用了词条:%1$s %2$s",
   "chat.enhanced_monster.clear_success": "已成功清除宠物的所有词条！",
 

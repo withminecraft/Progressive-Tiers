@@ -68,7 +68,7 @@ public class EffectAllocator {
 
         if (isMobBoss) {
             quality = 3;
-            count = 5;
+            count = 6;
             giveEffects(entity, count, quality, true, data);
         } 
         else if (isEntityInSpecialStructure(entity)) {
@@ -107,10 +107,6 @@ public class EffectAllocator {
     }
 
     private static void syncAndSave(LivingEntity entity, MobTraitData data) {
-        CompoundTag persistent = entity.getPersistentData();
-        persistent.putInt(TAG_QUALITY, data.getQuality());
-        persistent.putBoolean("IsBoss", data.isBoss());
-
         PacketDistributor.sendToPlayersTrackingEntity(entity, new PacketSyncMobTrait(entity.getId(), data.serializeNBT()));
     }
 
@@ -158,9 +154,9 @@ public class EffectAllocator {
     private static int getCountForQuality(int quality) {
         int roll = RANDOM.nextInt(100);
         return switch (quality) {
-            case 1 -> (roll < 70) ? 0 : 1;
-            case 2 -> (roll < 70) ? 2 : 3;
-            case 3 -> (roll < 70) ? 4 : 5;
+            case 1 -> (roll < 60) ? 0 : (roll < 90 ? 1 : 2);
+            case 2 -> (roll < 70) ? 3 : 4;
+            case 3 -> (roll < 70) ? 5 : 6;
             default -> 0;
         };
     }
@@ -182,10 +178,6 @@ public class EffectAllocator {
             data.addTrait(effectTag, level);
             applyImmediateAttributes(entity, effectTag, level);
             applied++;
-        }
-
-        if (shouldGlow && ModConfig.ENABLE_GLOWING.get()) {
-            entity.setGlowingTag(true);
         }
     }
 

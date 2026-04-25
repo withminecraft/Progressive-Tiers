@@ -34,11 +34,6 @@ public class ClothConfigScreen {
                 .setSaveConsumer(ModConfig.ENABLE_PARTICLES::set)
                 .build());
 
-        general.addEntry(entryBuilder.startBooleanToggle(Component.translatable("option.enhanced_monster.enable_glowing"), ModConfig.ENABLE_GLOWING.get())
-                .setDefaultValue(false)
-                .setSaveConsumer(ModConfig.ENABLE_GLOWING::set)
-                .build());
-
         general.addEntry(entryBuilder.startDoubleField(Component.translatable("option.enhanced_monster.tier_1_limit"), ModConfig.TIER_1_LIMIT.get())
                 .setDefaultValue(40.0)
                 .setMin(0.0)

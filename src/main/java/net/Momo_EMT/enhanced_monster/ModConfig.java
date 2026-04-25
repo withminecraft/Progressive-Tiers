@@ -23,7 +23,6 @@ public class ModConfig {
     public static final ModConfigSpec.DoubleValue TIER_2_LIMIT;
     
     public static final ModConfigSpec.BooleanValue ENABLE_PARTICLES;
-    public static final ModConfigSpec.BooleanValue ENABLE_GLOWING;
 
     public static final ModConfigSpec.ConfigValue<List<? extends String>> QUALITY_2_EXTRA_DROPS;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> QUALITY_3_EXTRA_DROPS;
@@ -62,8 +61,8 @@ public class ModConfig {
         ).defineList("whitelist", Collections.emptyList(), obj -> obj instanceof String);
 
         BOSS_LIST = BUILDER.comment(
-                "BOSS名单：百分百获得5个高级效果并发光。",
-                "Boss List: Entities in this list will always receive 5 high-tier effects and the Glowing effect."
+                "BOSS名单：百分百获得6个高级效果。",
+                "Boss List: Entities in this list will always receive 6 high-tier effects."
         ).defineList("boss_list", List.of(
                 "minecraft:ender_dragon", "minecraft:wither", "cataclysm:ender_guardian", "cataclysm:ignis", "cataclysm:netherite_monstrosity", "cataclysm:the_harbinger", 
                 "cataclysm:the_leviathan", "cataclysm:ancient_remnant", "cataclysm:maledictus", "cataclysm:scylla", "irons_spellbooks:dead_king", "irons_spellbooks:fire_boss", 
@@ -84,11 +83,6 @@ public class ModConfig {
                 "是否开启精英怪/BOSS的粒子特效（仅视觉）。",
                 "Enable/Disable visual particle effects for Elite/Boss mobs."
         ).define("enable_particles", true);
-
-        ENABLE_GLOWING = BUILDER.comment(
-                "是否开启精英怪/BOSS的自动发光效果。",
-                "Enable/Disable automatic Glowing effect for Elite/Boss mobs."
-        ).define("enable_glowing", false);
 
         BUILDER.push("Extra Drops");
         String dropExample = "格式: \"物品ID,最小数量,最大数量,掉落概率(0-1)\"。例如: \"minecraft:diamond,1,2,0.5\" 代表50%几率掉落1-2个钻石。";

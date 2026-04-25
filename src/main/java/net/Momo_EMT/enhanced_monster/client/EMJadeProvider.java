@@ -2,7 +2,10 @@ package net.Momo_EMT.enhanced_monster.client;
 
 import net.Momo_EMT.enhanced_monster.EnhancedMonster;
 import net.Momo_EMT.enhanced_monster.EffectAllocator;
+import net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment;
+import net.Momo_EMT.enhanced_monster.capability.MobTraitData;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -16,6 +19,7 @@ import snownee.jade.api.config.IPluginConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public enum EMJadeProvider implements IEntityComponentProvider, IServerDataProvider<EntityAccessor> {
     INSTANCE;
@@ -24,23 +28,25 @@ public enum EMJadeProvider implements IEntityComponentProvider, IServerDataProvi
 
     @Override
     public void appendTooltip(ITooltip tooltip, EntityAccessor accessor, IPluginConfig config) {
-        CompoundTag nbt = accessor.getEntity().getPersistentData();
+        net.minecraft.world.entity.Entity entity = accessor.getEntity();
         
-        if (nbt.contains("EM_SyncData")) {
-            CompoundTag syncData = nbt.getCompound("EM_SyncData");
+        net.Momo_EMT.enhanced_monster.capability.MobTraitData cap = 
+            entity.getData(net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment.MOB_TRAIT);
+        
+        if (cap != null && cap.isProcessed()) {
+            Map<String, Integer> traits = cap.getTraits(); 
             
-            if (syncData.contains("Traits")) {
-                CompoundTag traitsTag = syncData.getCompound("Traits");
-                List<Component> entries = new ArrayList<>();
+            if (!traits.isEmpty()) {
+                List<net.minecraft.network.chat.Component> entries = new ArrayList<>();
                 
-                for (String key : traitsTag.getAllKeys()) {
-                    entries.add(buildStyledEntry(key, traitsTag.getInt(key)));
-                }
-                
+                traits.forEach((key, level) -> {
+                    entries.add(buildStyledEntry(key, level));
+                });
+
                 for (int i = 0; i < entries.size(); i += 2) {
-                    MutableComponent line = entries.get(i).copy(); 
+                    net.minecraft.network.chat.MutableComponent line = entries.get(i).copy(); 
                     if (i + 1 < entries.size()) {
-                        line.append(Component.literal("  ")).append(entries.get(i + 1));
+                        line.append(net.minecraft.network.chat.Component.literal("  ")).append(entries.get(i + 1));
                     }
                     tooltip.add(line);
                 }

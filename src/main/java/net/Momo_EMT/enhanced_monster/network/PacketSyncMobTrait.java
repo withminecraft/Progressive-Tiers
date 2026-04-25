@@ -36,11 +36,6 @@ public record PacketSyncMobTrait(int entityId, CompoundTag tag) implements Custo
             if (Minecraft.getInstance().level != null) {
                 Entity entity = Minecraft.getInstance().level.getEntity(payload.entityId());
                 if (entity != null) {
-                    CompoundTag nbt = entity.getPersistentData();
-                    nbt.put("EM_SyncData", payload.tag());
-                    nbt.putInt(EffectAllocator.TAG_QUALITY, payload.tag().getInt("Quality"));
-                    nbt.putBoolean("IsBoss", payload.tag().getBoolean("IsBoss"));
-
                     MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
                     data.deserializeNBT(payload.tag());
                 }

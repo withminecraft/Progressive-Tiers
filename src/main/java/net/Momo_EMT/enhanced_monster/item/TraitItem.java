@@ -71,7 +71,7 @@ public class TraitItem extends Item {
                 return InteractionResult.FAIL;
             }
         } 
-        else if (traits.size() >= 5) {
+        else if (traits.size() >= 6) {
             player.displayClientMessage(Component.translatable("chat.enhanced_monster.max_traits_reached").withStyle(ChatFormatting.GOLD), true);
             return InteractionResult.FAIL;
         }

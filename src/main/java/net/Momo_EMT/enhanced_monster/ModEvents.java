@@ -180,11 +180,31 @@ public class ModEvents {
             }
 
             MobTraitData atkData = attacker.getData(MobTraitAttachment.MOB_TRAIT);
+            Map<String, Integer> atkTraits = atkData.getTraits();
+            float currentAmount = event.getAmount();
+
+            if (atkTraits.containsKey(EffectAllocator.POWERFUL)) {
+                boolean isEnhanced = event.getSource().is(DamageTypeTags.WITCH_RESISTANT_TO)
+                                  || event.getSource().is(DamageTypeTags.IS_PROJECTILE)
+                                  || event.getSource().is(DamageTypeTags.IS_EXPLOSION)
+                                  || event.getSource().is(DamageTypeTags.IS_FIRE)
+                                  || event.getSource().is(DamageTypeTags.IS_FREEZING)
+                                  || event.getSource().is(DamageTypeTags.IS_LIGHTNING);
+                if (isEnhanced) {
+                    int level = atkTraits.get(EffectAllocator.POWERFUL) + 1;
+                    currentAmount = currentAmount * (1.0f + (level * 0.05f));
+                }
+            }
+
             if (atkData.getTraits().containsKey(EffectAllocator.BERSERK)) {
-                event.setAmount(event.getAmount() * 1.5f);
+                currentAmount = currentAmount * 1.5f;
                 if (attacker.level() instanceof ServerLevel serverLevel) {
                     serverLevel.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.1, 0.1, 0.1, 0.5);
                 }
+            }
+
+            if (currentAmount != event.getAmount()) {
+                event.setAmount(currentAmount);
             }
         }
     }
@@ -199,7 +219,7 @@ public class ModEvents {
         
         if (traits.containsKey(EffectAllocator.PROTECTED)) {
             int level = traits.get(EffectAllocator.PROTECTED) + 1;
-            float reduction = Math.max(0.1f, 1.0f - (level * 0.1f));
+            float reduction = Math.max(0.0f, 1.0f - (level * 0.1f));
             event.setNewDamage(event.getNewDamage() * reduction);
         }
 
@@ -216,20 +236,23 @@ public class ModEvents {
                 }
             }
 
-            if (atkTraits.containsKey(EffectAllocator.VOID)) {
-                long currentTime = attacker.level().getGameTime();
-                String tag = "void_cd";
-                long lastTriggered = attacker.getPersistentData().getLong(tag);
+        if (atkTraits.containsKey(EffectAllocator.VOID)) {
+            long currentTime = attacker.level().getGameTime();
+            long lastTriggered = atkData.getVoidCooldown(); 
 
-                if (currentTime - lastTriggered >= 10) {
-                    int level = atkTraits.get(EffectAllocator.VOID) + 1;
-                    event.setNewDamage(event.getNewDamage() + (victim.getMaxHealth() * (level * 0.04f)));
-                    if (attacker.level() instanceof ServerLevel serverLevel) {
-                        serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
-                    }
-                    attacker.getPersistentData().putLong(tag, currentTime);
+            if (currentTime - lastTriggered >= 10) {
+                int level = atkTraits.get(EffectAllocator.VOID) + 1;
+                event.setNewDamage(event.getNewDamage() + (victim.getMaxHealth() * (level * 0.04f)));
+                
+                if (attacker.level() instanceof ServerLevel serverLevel) {
+                    serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
                 }
+
+                atkData.setVoidCooldown(currentTime);
+
+                syncAndSave(attacker, atkData); 
             }
+        }
         }
     }
 
@@ -251,8 +274,9 @@ public class ModEvents {
             }
 
             if (atkTraits.containsKey(EffectAllocator.STRAY)) {
-                victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, atkTraits.get(EffectAllocator.STRAY)));
+                int amp = atkTraits.get(EffectAllocator.STRAY);
                 victim.setTicksFrozen(400);
+                if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, amp - 1));
             }
 
             if (atkTraits.containsKey(EffectAllocator.WEAKENER)) {
@@ -278,10 +302,12 @@ public class ModEvents {
         }
 
         if (entity.level().isClientSide) {
-            CompoundTag nbt = entity.getPersistentData();
-            if (nbt.contains(EffectAllocator.TAG_QUALITY)) {
-                int quality = nbt.getInt(EffectAllocator.TAG_QUALITY);
-                boolean isBoss = nbt.getBoolean("IsBoss");
+            net.Momo_EMT.enhanced_monster.capability.MobTraitData cap = entity.getData(net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment.MOB_TRAIT);
+            
+            if (cap != null && cap.isProcessed()) { 
+                int quality = cap.getQuality(); 
+                boolean isBoss = cap.isBoss(); 
+                
                 if (quality >= 2 || isBoss) {
                     net.Momo_EMT.enhanced_monster.client.ClientParticles.spawnParticles(entity, quality, isBoss);
                 }
@@ -307,16 +333,16 @@ public class ModEvents {
     }
 
     private static void handleCustomRegen(LivingEntity entity) {
-        CompoundTag nbt = entity.getPersistentData();
+        MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
         long currentTime = entity.level().getGameTime();
 
-        if (!nbt.contains("EM_Initial_Max_Health")) {
-            nbt.putDouble("EM_Initial_Max_Health", entity.getMaxHealth());
+        if (data.getInitialMaxHealth() <= 0) {
+            data.setInitialMaxHealth(entity.getMaxHealth());
         }
-        double originalMax = nbt.getDouble("EM_Initial_Max_Health");
+        double originalMax = data.getInitialMaxHealth();
         
-        long cooldownEnd = nbt.getLong("EM_Regen_CD");
-        long effectEnd = nbt.getLong("EM_Regen_Active_End");
+        long cooldownEnd = data.getRegenCooldown();
+        long effectEnd = data.getRegenActiveEnd();
 
         var maxHealthInstance = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         if (maxHealthInstance == null) return;
@@ -328,9 +354,8 @@ public class ModEvents {
             }
         } 
         else if (currentTime >= cooldownEnd && entity.getHealth() <= (float) (originalMax * 0.3f)) {
-            
-            nbt.putLong("EM_Regen_Active_End", currentTime + 600);
-            nbt.putLong("EM_Regen_CD", currentTime + 1200);
+            data.setRegenActiveEnd(currentTime + 600);
+            data.setRegenCooldown(currentTime + 1200);
 
             if (entity.getMaxHealth() > originalMax * 0.41) {
                 double currentPenalty = 0;
@@ -349,6 +374,19 @@ public class ModEvents {
                     entity.setHealth(entity.getMaxHealth());
                 }
             }
+            
+            syncAndSave(entity, data); 
+        }
+    }
+
+    private static void syncAndSave(net.minecraft.world.entity.LivingEntity entity, net.Momo_EMT.enhanced_monster.capability.MobTraitData data) {
+        entity.setData(net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment.MOB_TRAIT, data);
+
+        net.minecraft.nbt.CompoundTag syncTag = data.serializeNBT();
+
+        if (!entity.level().isClientSide) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntity(entity, 
+                new net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait(entity.getId(), syncTag));
         }
     }
 

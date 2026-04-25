@@ -13,6 +13,12 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
     private boolean processed = false;
     private boolean isBoss = false;
 
+    private double initialMaxHealth = -1;
+    private long regenCooldown = 0;
+    private long regenActiveEnd = 0;
+
+    private long voidCooldown = 0;
+
     public MobTraitData() {}
 
     public void addTrait(String tag, int level) { this.traits.put(tag, level); }
@@ -23,6 +29,16 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
     public void setProcessed(boolean processed) { this.processed = processed; }
     public boolean isBoss() { return isBoss; }
     public void setBoss(boolean isBoss) { this.isBoss = isBoss; }
+
+    public double getInitialMaxHealth() { return initialMaxHealth; }
+    public void setInitialMaxHealth(double initialMaxHealth) { this.initialMaxHealth = initialMaxHealth; }
+    public long getRegenCooldown() { return regenCooldown; }
+    public void setRegenCooldown(long regenCooldown) { this.regenCooldown = regenCooldown; }
+    public long getRegenActiveEnd() { return regenActiveEnd; }
+    public void setRegenActiveEnd(long regenActiveEnd) { this.regenActiveEnd = regenActiveEnd; }
+
+    public long getVoidCooldown() { return voidCooldown; }
+    public void setVoidCooldown(long voidCooldown) { this.voidCooldown = voidCooldown; }
 
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
@@ -42,6 +58,13 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
         CompoundTag traitsTag = new CompoundTag();
         this.traits.forEach(traitsTag::putInt);
         nbt.put("Traits", traitsTag);
+
+        nbt.putDouble("InitialMaxHealth", this.initialMaxHealth);
+        nbt.putLong("RegenCD", this.regenCooldown);
+        nbt.putLong("RegenActiveEnd", this.regenActiveEnd);
+
+        nbt.putLong("VoidCD", this.voidCooldown);
+
         return nbt;
     }
 
@@ -49,6 +72,13 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
         this.quality = nbt.getInt("Quality");
         this.processed = nbt.getBoolean("Processed");
         this.isBoss = nbt.getBoolean("IsBoss");
+
+        this.initialMaxHealth = nbt.getDouble("InitialMaxHealth");
+        this.regenCooldown = nbt.getLong("RegenCD");
+        this.regenActiveEnd = nbt.getLong("RegenActiveEnd");
+
+        this.voidCooldown = nbt.getLong("VoidCD");
+
         this.traits.clear();
         if (nbt.contains("Traits", Tag.TAG_COMPOUND)) {
             CompoundTag traitsTag = nbt.getCompound("Traits");
