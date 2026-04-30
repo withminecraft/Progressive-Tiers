@@ -12,7 +12,7 @@ public class TraitConfig {
         ITEM_ENABLED_TRAITS.put(EffectAllocator.POWERFUL, 5); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.TANKY, 4); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.PROTECTED, 5);  
-        ITEM_ENABLED_TRAITS.put(EffectAllocator.SPEEDY, 5); 
+        ITEM_ENABLED_TRAITS.put(EffectAllocator.SPEEDY, 4); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.FIRE_PROT, 0); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.POISONOUS, 2); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.STRAY, 2); 
@@ -20,6 +20,7 @@ public class TraitConfig {
         ITEM_ENABLED_TRAITS.put(EffectAllocator.BERSERK, 0); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.LIFESTEAL, 0); 
         ITEM_ENABLED_TRAITS.put(EffectAllocator.WITHERING, 2);
+        ITEM_ENABLED_TRAITS.put(EffectAllocator.ELUSIVE, 4);
     }
 
     public static boolean hasItem(String traitType) {

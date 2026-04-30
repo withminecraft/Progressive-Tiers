@@ -9,6 +9,7 @@ import net.minecraft.world.entity.animal.horse.SkeletonHorse;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -48,9 +49,9 @@ public class SkeletonSpecial implements ISpecialElite {
         equipArmor(skeleton, EquipmentSlot.FEET, Items.DIAMOND_BOOTS);
 
         ItemStack bow = new ItemStack(Items.BOW);
+        bow.enchant(Enchantments.POWER_ARROWS, 3);
         bow.enchant(Enchantments.PUNCH_ARROWS, 2);
         bow.enchant(Enchantments.FLAMING_ARROWS, 1);
-        bow.enchant(Enchantments.POWER_ARROWS, 3);
         bow.enchant(Enchantments.VANISHING_CURSE, 1);
         bow.enchant(Enchantments.BINDING_CURSE, 1);
         bow.getOrCreateTag().putBoolean("Unbreakable", true);
@@ -58,7 +59,7 @@ public class SkeletonSpecial implements ISpecialElite {
         skeleton.setItemSlot(EquipmentSlot.MAINHAND, bow);
     }
 
-    private void equipArmor(Skeleton skeleton, EquipmentSlot slot, net.minecraft.world.item.Item item) {
+    private void equipArmor(Skeleton skeleton, EquipmentSlot slot, Item item) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
         stack.enchant(Enchantments.VANISHING_CURSE, 1);

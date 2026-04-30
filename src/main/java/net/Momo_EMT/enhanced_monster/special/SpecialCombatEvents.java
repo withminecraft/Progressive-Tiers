@@ -42,28 +42,28 @@ public class SpecialCombatEvents {
         }
     }
 
-@SubscribeEvent
-public static void onHuskAttack(LivingHurtEvent event) {
-    if (event.getEntity().level().isClientSide) return;
+    @SubscribeEvent
+    public static void onHuskAttack(LivingHurtEvent event) {
+        if (event.getEntity().level().isClientSide) return;
 
-    Entity attacker = event.getSource().getEntity();
-    
-    if (attacker instanceof LivingEntity livingAttacker) {
-        if (livingAttacker.getPersistentData().getBoolean(HuskSpecial.TAG_DROP_ANCIENT_LOOT)) {
-            
-            long currentTime = livingAttacker.level().getGameTime();
-            String nbtKey = "last_sandstorm_tick";
-            
-            long lastTriggerTime = livingAttacker.getPersistentData().getLong(nbtKey);
-
-            if (currentTime - lastTriggerTime >= 20) {
-                CataclysmCompat.spawnSandstorm(livingAttacker);
+        Entity attacker = event.getSource().getEntity();
+        
+        if (attacker instanceof LivingEntity livingAttacker) {
+            if (livingAttacker.getPersistentData().getBoolean(HuskSpecial.TAG_DROP_ANCIENT_LOOT)) {
                 
-                livingAttacker.getPersistentData().putLong(nbtKey, currentTime);
+                long currentTime = livingAttacker.level().getGameTime();
+                String nbtKey = "last_sandstorm_tick";
+                
+                long lastTriggerTime = livingAttacker.getPersistentData().getLong(nbtKey);
+
+                if (currentTime - lastTriggerTime >= 20) {
+                    CataclysmCompat.spawnSandstorm(livingAttacker);
+                    
+                    livingAttacker.getPersistentData().putLong(nbtKey, currentTime);
+                }
             }
         }
     }
-}
 
     @SubscribeEvent
     public static void onSpiderAttack(LivingHurtEvent event) {

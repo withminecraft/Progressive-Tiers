@@ -46,7 +46,7 @@ public class ClientParticles {
                 level.addParticle(ParticleTypes.SOUL, rx, y + 0.2, rz, 0, soulSpeed, 0);
             }
 
-            if (level.random.nextFloat() < 0.85f) { 
+            if (level.random.nextFloat() < 0.8f) { 
                 for (int i = 0; i < 3; i++) {
                     double angle = level.random.nextDouble() * Math.PI * 2;
                     double dist = width + 0.7; 

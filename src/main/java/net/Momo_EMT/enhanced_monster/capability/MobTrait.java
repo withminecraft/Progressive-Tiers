@@ -11,10 +11,12 @@ public class MobTrait implements IMobTrait {
     private boolean isBoss = false;
 
     private double regenInitialMaxHealth = 0;
-    private long regenCooldown = 0;
-    private long regenActiveEnd = 0;
+    private int regenActiveTicks;
+    private int regenCooldownTicks;
 
     private long voidCooldown = 0;
+
+    private int inhibitHealTicks;
 
     @Override
     public void addTrait(String tag, int level) {
@@ -38,14 +40,17 @@ public class MobTrait implements IMobTrait {
     @Override public double getRegenInitialMaxHealth() { return regenInitialMaxHealth; }
     @Override public void setRegenInitialMaxHealth(double health) { this.regenInitialMaxHealth = health; }
 
-    @Override public long getRegenCooldown() { return regenCooldown; }
-    @Override public void setRegenCooldown(long time) { this.regenCooldown = time; }
+    @Override public int getRegenActiveTicks() { return regenActiveTicks; }
+    @Override public void setRegenActiveTicks(int ticks) { this.regenActiveTicks = ticks; }
 
-    @Override public long getRegenActiveEnd() { return regenActiveEnd; }
-    @Override public void setRegenActiveEnd(long time) { this.regenActiveEnd = time; }
+    @Override public int getRegenCooldownTicks() { return regenCooldownTicks; }
+    @Override public void setRegenCooldownTicks(int ticks) { this.regenCooldownTicks = ticks; }
 
     @Override public long getVoidCooldown() { return voidCooldown; }
     @Override public void setVoidCooldown(long time) { this.voidCooldown = time; }
+
+    @Override public int getInhibitHealTicks() { return inhibitHealTicks; }
+    @Override public void setInhibitHealTicks(int ticks) { this.inhibitHealTicks = ticks; }
 
 
     @Override
@@ -56,10 +61,12 @@ public class MobTrait implements IMobTrait {
         nbt.putBoolean("IsBoss", this.isBoss);
 
         nbt.putDouble("RegenInitialMaxHealth", this.regenInitialMaxHealth);
-        nbt.putLong("RegenCooldown", this.regenCooldown);
-        nbt.putLong("RegenActiveEnd", this.regenActiveEnd);
+        nbt.putInt("RegenActiveTicks", this.regenActiveTicks);
+        nbt.putInt("RegenCooldownTicks", this.regenCooldownTicks);
 
         nbt.putLong("VoidCooldown", this.voidCooldown);
+
+        nbt.putInt("InhibitHealTicks", this.inhibitHealTicks);
         
         CompoundTag traitsTag = new CompoundTag();
         this.traits.forEach(traitsTag::putInt);
@@ -75,10 +82,12 @@ public class MobTrait implements IMobTrait {
         this.isBoss = nbt.getBoolean("IsBoss");
 
         this.regenInitialMaxHealth = nbt.getDouble("RegenInitialMaxHealth");
-        this.regenCooldown = nbt.getLong("RegenCooldown");
-        this.regenActiveEnd = nbt.getLong("RegenActiveEnd");
+        this.regenActiveTicks = nbt.getInt("RegenActiveTicks");
+        this.regenCooldownTicks = nbt.getInt("RegenCooldownTicks");
 
         this.voidCooldown = nbt.getLong("VoidCooldown");
+
+        this.inhibitHealTicks = nbt.getInt("InhibitHealTicks");
         
         this.traits.clear();
         if (nbt.contains("Traits")) {

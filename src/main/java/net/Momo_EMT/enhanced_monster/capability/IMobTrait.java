@@ -21,14 +21,17 @@ public interface IMobTrait extends INBTSerializable<CompoundTag> {
     double getRegenInitialMaxHealth();
     void setRegenInitialMaxHealth(double health);
 
-    long getRegenCooldown();
-    void setRegenCooldown(long time);
+    int getRegenActiveTicks();
+    void setRegenActiveTicks(int ticks);
 
-    long getRegenActiveEnd();
-    void setRegenActiveEnd(long time);
+    int getRegenCooldownTicks();
+    void setRegenCooldownTicks(int ticks);
 
     long getVoidCooldown();
     void setVoidCooldown(long time);
+
+    int getInhibitHealTicks();
+    void setInhibitHealTicks(int ticks);
 
     @Override
     CompoundTag serializeNBT();

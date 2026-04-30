@@ -11,19 +11,22 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Map.entry;
+
 public class StructureValidator {
 
-    private static final Map<String, Set<String>> STRUCTURE_MOB_MAP = Map.of(
-        "fortress", Set.of("minecraft:wither_skeleton"),
-        "bastion_remnant", Set.of("minecraft:piglin", "minecraft:piglin_brute"),
-        "mansion", Set.of("minecraft:vindicator", "minecraft:evoker"),
-        "stronghold", Set.of("minecraft:creeper", "minecraft:spider"),
-        "shelter", Set.of("minecraft:vindicator", "minecraft:evoker"),
-        "wind_shrine", Set.of("minecraft:ravager", "goety:crusher", "goety:storm_caster"),
-        "ominous_blacksmith", Set.of("minecraft:ravager", "goety:crusher", "goety:storm_caster"),
-        "dark_manor", Set.of("minecraft:vindicator", "minecraft:witch", "minecraft:illusioner", "goety:piker"),
-        "sorcerous_keep", Set.of("goety:sorcerer"),
-        "crypt", Set.of("goety:cairn_necromancer")
+    private static final Map<String, Set<String>> STRUCTURE_MOB_MAP = Map.ofEntries(
+        entry("fortress", Set.of("minecraft:wither_skeleton")),
+        entry("bastion_remnant", Set.of("minecraft:piglin", "minecraft:piglin_brute")),
+        entry("mansion", Set.of("minecraft:vindicator", "minecraft:evoker")),
+        entry("stronghold", Set.of("minecraft:creeper", "minecraft:spider")),
+        entry("citadel", Set.of("irons_spellbooks:citadel_keeper")),
+        entry("shelter", Set.of("minecraft:vindicator", "minecraft:evoker")),
+        entry("wind_shrine", Set.of("minecraft:ravager", "goety:crusher", "goety:storm_caster")),
+        entry("ominous_blacksmith", Set.of("minecraft:ravager", "goety:crusher", "goety:storm_caster")),
+        entry("dark_manor", Set.of("minecraft:vindicator", "minecraft:witch", "minecraft:illusioner", "goety:piker")),
+        entry("sorcerous_keep", Set.of("goety:sorcerer")),
+        entry("crypt", Set.of("goety:cairn_necromancer"))
     );
 
     public static boolean isEntityInSpecialStructure(LivingEntity entity) {

@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -31,8 +32,8 @@ public class PiglinSpecial implements ISpecialElite {
             piglin.setItemSlot(EquipmentSlot.MAINHAND, sword);
         } else {
             ItemStack crossbow = new ItemStack(Items.CROSSBOW);
-            crossbow.enchant(Enchantments.QUICK_CHARGE, 3);
             crossbow.enchant(Enchantments.PIERCING, 4);
+            crossbow.enchant(Enchantments.QUICK_CHARGE, 3);
             
             applyEliteStatus(crossbow);
             
@@ -42,7 +43,7 @@ public class PiglinSpecial implements ISpecialElite {
         piglin.getPersistentData().putBoolean(TAG_DROP_GOLD, true);
     }
 
-    private void equipGoldArmor(Piglin piglin, EquipmentSlot slot, net.minecraft.world.item.Item item) {
+    private void equipGoldArmor(Piglin piglin, EquipmentSlot slot, Item item) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         

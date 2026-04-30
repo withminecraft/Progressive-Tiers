@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -31,7 +32,7 @@ public class DrownedSpecial implements ISpecialElite {
         drowned.getPersistentData().putBoolean(TAG_DROP_TRIDENT, true);
     }
 
-    private void equipArmor(Drowned drowned, EquipmentSlot slot, net.minecraft.world.item.Item item) {
+    private void equipArmor(Drowned drowned, EquipmentSlot slot, Item item) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
         stack.enchant(Enchantments.VANISHING_CURSE, 1);

@@ -9,6 +9,7 @@ import net.minecraft.world.entity.animal.horse.ZombieHorse;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -48,9 +49,9 @@ public class ZombieSpecial implements ISpecialElite {
         equip(zombie, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, 0);
 
         ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
+        sword.enchant(Enchantments.SHARPNESS, 3);
         sword.enchant(Enchantments.KNOCKBACK, 2);
         sword.enchant(Enchantments.FIRE_ASPECT, 2);
-        sword.enchant(Enchantments.SHARPNESS, 3);
         sword.enchant(Enchantments.VANISHING_CURSE, 1);
         sword.enchant(Enchantments.BINDING_CURSE, 1);
         sword.getOrCreateTag().putBoolean("Unbreakable", true);
@@ -58,7 +59,7 @@ public class ZombieSpecial implements ISpecialElite {
         zombie.setItemSlot(EquipmentSlot.MAINHAND, sword);
     }
 
-    private void equip(Zombie zombie, EquipmentSlot slot, net.minecraft.world.item.Item item, int dummy) {
+    private void equip(Zombie zombie, EquipmentSlot slot, Item item, int dummy) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
         stack.enchant(Enchantments.VANISHING_CURSE, 1);

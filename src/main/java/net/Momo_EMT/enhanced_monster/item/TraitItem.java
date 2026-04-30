@@ -20,6 +20,7 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Properties;
 
 public class TraitItem extends Item {
     private final String traitType; 
@@ -58,6 +59,15 @@ public class TraitItem extends Item {
 
         return target.getCapability(MobTraitProvider.MOB_TRAIT).map(cap -> {
             var traits = cap.getTraits();
+
+            if (this.traitType.equals(EffectAllocator.PROTECTED) && traits.containsKey(EffectAllocator.ELUSIVE)) {
+                player.displayClientMessage(Component.translatable("chat.enhanced_monster.conflict_elusive").withStyle(ChatFormatting.RED), true);
+                return InteractionResult.FAIL;
+            }
+            if (this.traitType.equals(EffectAllocator.ELUSIVE) && traits.containsKey(EffectAllocator.PROTECTED)) {
+                player.displayClientMessage(Component.translatable("chat.enhanced_monster.conflict_protected").withStyle(ChatFormatting.RED), true);
+                return InteractionResult.FAIL;
+            }
             
             if (traits.containsKey(traitType)) {
                 if (itemLevel <= traits.get(traitType)) {

@@ -6,6 +6,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -33,7 +34,7 @@ public class ZombifiedPiglinSpecial implements ISpecialElite {
         zPiglin.getPersistentData().putBoolean(TAG_DROP_GOLD, true);
     }
 
-    private void equipGoldArmor(ZombifiedPiglin zPiglin, EquipmentSlot slot, net.minecraft.world.item.Item item) {
+    private void equipGoldArmor(ZombifiedPiglin zPiglin, EquipmentSlot slot, Item item) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
         stack.enchant(Enchantments.VANISHING_CURSE, 1);

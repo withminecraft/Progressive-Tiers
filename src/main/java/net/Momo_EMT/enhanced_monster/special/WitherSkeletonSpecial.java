@@ -58,8 +58,8 @@ public class WitherSkeletonSpecial implements ISpecialElite {
 
     private ItemStack createEliteArmor(Item item) {
         ItemStack stack = new ItemStack(item);
-        applyEliteStatus(stack);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+        applyEliteStatus(stack);
         if (item instanceof ArmorItem) {
             CompoundTag nbt = stack.getOrCreateTag();
             CompoundTag trimTag = new CompoundTag();
@@ -72,14 +72,14 @@ public class WitherSkeletonSpecial implements ISpecialElite {
 
     private ItemStack createEliteModArmor(String registryName) {
         ItemStack stack = getModItem(registryName);
-        applyEliteStatus(stack);
         stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 1);
+        applyEliteStatus(stack);
         return stack;
     }
 
     private void applyEliteWeaponMods(ItemStack stack) {
-        applyEliteStatus(stack);
         stack.enchant(Enchantments.SHARPNESS, 3);
+        applyEliteStatus(stack);
     }
 
     private void applyEliteStatus(ItemStack stack) {

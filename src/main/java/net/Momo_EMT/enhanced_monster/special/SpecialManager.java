@@ -23,6 +23,7 @@ public class SpecialManager {
         HANDLERS.put("minecraft:pillager", new PillagerSpecial());
         HANDLERS.put("minecraft:husk", new HuskSpecial());
         HANDLERS.put("minecraft:spider", new SpiderSpecial());
+        HANDLERS.put("minecraft:witch", new WitchSpecial());
     }
 
     public static void tryApply(LivingEntity entity, int quality) {

@@ -6,6 +6,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -42,6 +43,22 @@ public class PillagerSpecial implements ISpecialElite {
         pillager.setItemSlot(EquipmentSlot.OFFHAND, firework);
         pillager.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 
+        equipIronArmor(pillager, EquipmentSlot.CHEST, Items.IRON_CHESTPLATE);
+        equipIronArmor(pillager, EquipmentSlot.LEGS, Items.IRON_LEGGINGS);
+        equipIronArmor(pillager, EquipmentSlot.FEET, Items.IRON_BOOTS);
+
         pillager.getPersistentData().putBoolean(TAG_DROP_EMERALD, true);
+    }
+
+    private void equipIronArmor(Pillager pillager, EquipmentSlot slot, Item item) {
+        ItemStack stack = new ItemStack(item);
+        
+        stack.enchant(Enchantments.ALL_DAMAGE_PROTECTION, 4);
+        stack.enchant(Enchantments.VANISHING_CURSE, 1);
+        stack.enchant(Enchantments.BINDING_CURSE, 1);
+        
+        stack.getOrCreateTag().putBoolean("Unbreakable", true);
+        
+        pillager.setItemSlot(slot, stack);
     }
 }
