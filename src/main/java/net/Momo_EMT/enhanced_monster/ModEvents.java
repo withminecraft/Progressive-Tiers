@@ -15,9 +15,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -35,6 +37,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.minecraft.core.registries.BuiltInRegistries;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -155,6 +158,8 @@ public class ModEvents {
         if (victim.level().isClientSide) return;
 
         MobTraitData data = victim.getData(MobTraitAttachment.MOB_TRAIT);
+        Map<String, Integer> traits = data.getTraits();
+
         if (data.getTraits().containsKey(EffectAllocator.FIRE_PROT) && event.getSource().is(DamageTypeTags.IS_FIRE)) {
             event.setCanceled(true);
             victim.setRemainingFireTicks(0);
@@ -179,6 +184,19 @@ public class ModEvents {
                 return;
             }
 
+            if (traits.containsKey(EffectAllocator.ELUSIVE)) {
+                int level = traits.get(EffectAllocator.ELUSIVE) + 1;
+                float dodgeChance = level * 0.10f; 
+
+                if (victim.getRandom().nextFloat() < dodgeChance) {
+                    event.setCanceled(true);
+
+                    if (victim.level() instanceof ServerLevel serverLevel) {
+                        serverLevel.sendParticles(ParticleTypes.POOF, victim.getX(), victim.getY(0.5), victim.getZ(), 20, 1, 1, 1, 0);
+                    }
+                }
+            }
+
             MobTraitData atkData = attacker.getData(MobTraitAttachment.MOB_TRAIT);
             Map<String, Integer> atkTraits = atkData.getTraits();
             float currentAmount = event.getAmount();
@@ -199,7 +217,32 @@ public class ModEvents {
             if (atkData.getTraits().containsKey(EffectAllocator.BERSERK)) {
                 currentAmount = currentAmount * 1.5f;
                 if (attacker.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.1, 0.1, 0.1, 0.5);
+                    serverLevel.sendParticles(ParticleTypes.CRIT, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.2, 0.2, 0.2, 0);
+                }
+            }
+
+            if (atkTraits.containsKey(EffectAllocator.EROSIVE)) {
+                DamageSource source = event.getSource();
+                int level = atkTraits.get(EffectAllocator.EROSIVE) + 1;
+                int durabilityDamage = level * 5;
+
+                if (victim.isDamageSourceBlocked(source)) {
+                    ItemStack mainHand = victim.getMainHandItem();
+                    ItemStack offHand = victim.getOffhandItem();
+                    ItemStack shield = ItemStack.EMPTY;
+                    EquipmentSlot slot = null;
+
+                    if (mainHand.getItem() instanceof net.minecraft.world.item.ShieldItem) {
+                        shield = mainHand;
+                        slot = EquipmentSlot.MAINHAND;
+                    } else if (offHand.getItem() instanceof net.minecraft.world.item.ShieldItem) {
+                        shield = offHand;
+                        slot = EquipmentSlot.OFFHAND;
+                    } 
+
+                    if (!shield.isEmpty()) {
+                        shield.hurtAndBreak(durabilityDamage * 4, victim, slot);
+                    }
                 }
             }
 
@@ -212,6 +255,7 @@ public class ModEvents {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamagePre(LivingDamageEvent.Pre event) {
         LivingEntity victim = event.getEntity();
+        DamageSource source = event.getSource();
         if (victim.level().isClientSide) return;
 
         MobTraitData vicData = victim.getData(MobTraitAttachment.MOB_TRAIT);
@@ -223,36 +267,74 @@ public class ModEvents {
             event.setNewDamage(event.getNewDamage() * reduction);
         }
 
+        if (victim.isDamageSourceBlocked(source)) return;
+
         LivingEntity attacker = getAttacker(event.getSource().getEntity(), event.getSource().getDirectEntity());
         if (attacker != null && attacker.isAlive()) {
             MobTraitData atkData = attacker.getData(MobTraitAttachment.MOB_TRAIT);
             Map<String, Integer> atkTraits = atkData.getTraits();
 
             if (atkTraits.containsKey(EffectAllocator.LIFESTEAL) && attacker.getHealth() < attacker.getMaxHealth()) {
-                float healAmount = Math.min(event.getNewDamage() * 0.5f, 12.0f);
+                float healAmount = Math.min(event.getNewDamage() * 0.5f, 20.0f);
                 attacker.heal(healAmount);
-                if (attacker.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(ParticleTypes.HEART, attacker.getX(), attacker.getY(0.5), attacker.getZ(), 5, 0.3, 0.3, 0.3, 0.0);
+                if (attacker.level() instanceof ServerLevel serverLevel && healAmount > 0) {
+                    serverLevel.sendParticles(ParticleTypes.HEART, attacker.getX(), attacker.getY(0.5), attacker.getZ(), 5, 0.3, 0.3, 0.3, 0);
                 }
             }
 
-        if (atkTraits.containsKey(EffectAllocator.VOID)) {
-            long currentTime = attacker.level().getGameTime();
-            long lastTriggered = atkData.getVoidCooldown(); 
+            if (atkTraits.containsKey(EffectAllocator.VOID)) {
+                long currentTime = attacker.level().getGameTime();
+                long lastTriggered = atkData.getVoidCooldown(); 
 
-            if (currentTime - lastTriggered >= 10) {
-                int level = atkTraits.get(EffectAllocator.VOID) + 1;
-                event.setNewDamage(event.getNewDamage() + (victim.getMaxHealth() * (level * 0.04f)));
-                
-                if (attacker.level() instanceof ServerLevel serverLevel) {
-                    serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                if (currentTime - lastTriggered >= 10) {
+                    int level = atkTraits.get(EffectAllocator.VOID) + 1;
+                    event.setNewDamage(event.getNewDamage() + (victim.getMaxHealth() * (level * 0.04f)));
+                    
+                    if (attacker.level() instanceof ServerLevel serverLevel) {
+                        serverLevel.sendParticles(ParticleTypes.DRAGON_BREATH, victim.getX(), victim.getY(0.5), victim.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                    }
+
+                    atkData.setVoidCooldown(currentTime);
+
+                    syncAndSave(attacker, atkData); 
+                }
+            }
+
+            if (atkTraits.containsKey(EffectAllocator.EROSIVE)) {
+                int level = atkTraits.get(EffectAllocator.EROSIVE) + 1;
+                int durabilityDamage = level * 5;
+
+                List<EquipmentSlot> activeSlots = new java.util.ArrayList<>();
+                for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    if (slot.isArmor() && !victim.getItemBySlot(slot).isEmpty()) {
+                        activeSlots.add(slot);
+                    }
                 }
 
-                atkData.setVoidCooldown(currentTime);
+                if (!activeSlots.isEmpty()) {
+                    EquipmentSlot targetSlot = activeSlots.get(attacker.getRandom().nextInt(activeSlots.size()));
+                    ItemStack armorStack = victim.getItemBySlot(targetSlot);
+                    armorStack.hurtAndBreak(durabilityDamage, victim, targetSlot);
+                }
 
-                syncAndSave(attacker, atkData); 
+                if (victim instanceof net.minecraft.world.entity.player.Player player) {
+                    if (attacker.getRandom().nextFloat() < 0.5f) {
+                        int reduction = level * 2;
+                        var foodData = player.getFoodData();
+                            
+                        foodData.setFoodLevel(Math.max(0, foodData.getFoodLevel() - reduction));
+                            
+                        foodData.setSaturation(Math.max(0.0f, foodData.getSaturationLevel() - (float)reduction));
+
+                        player.addEffect(new MobEffectInstance(MobEffects.HUNGER, 400, level - 1));
+                    }
+                } else {
+                        if (attacker.getRandom().nextFloat() < 0.5f) {
+                            float extraDamage = (float) level;
+                            event.setNewDamage(event.getNewDamage() + extraDamage);
+                        }
+                    }
             }
-        }
         }
     }
 
@@ -261,7 +343,10 @@ public class ModEvents {
         if (event.getEntity().level().isClientSide) return;
 
         LivingEntity victim = event.getEntity();
+        DamageSource source = event.getSource();
         LivingEntity attacker = getAttacker(event.getSource().getEntity(), event.getSource().getDirectEntity());
+
+        if (victim.isDamageSourceBlocked(source)) return;
 
         if (attacker != null && attacker.isAlive()) {
             MobTraitData atkData = attacker.getData(MobTraitAttachment.MOB_TRAIT);
@@ -270,21 +355,25 @@ public class ModEvents {
             if (atkTraits.containsKey(EffectAllocator.POISONOUS)) {
                 int amp = atkTraits.get(EffectAllocator.POISONOUS);
                 victim.addEffect(new MobEffectInstance(MobEffects.POISON, 200, amp));
-                if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 200, amp - 1));
+                if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 400, amp - 1));
             }
 
             if (atkTraits.containsKey(EffectAllocator.STRAY)) {
                 int amp = atkTraits.get(EffectAllocator.STRAY);
                 victim.setTicksFrozen(400);
-                if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 200, amp - 1));
+                if (amp >= 1) victim.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 400, amp - 1));
             }
 
             if (atkTraits.containsKey(EffectAllocator.WEAKENER)) {
-                victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 200, atkTraits.get(EffectAllocator.WEAKENER)));
+                victim.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 400, atkTraits.get(EffectAllocator.WEAKENER)));
             }
 
             if (atkTraits.containsKey(EffectAllocator.WITHERING)) {
                 victim.addEffect(new MobEffectInstance(MobEffects.WITHER, 200, atkTraits.get(EffectAllocator.WITHERING)));
+
+                MobTraitData vicData = victim.getData(MobTraitAttachment.MOB_TRAIT);
+                vicData.setHealInhibitTicks(100);
+                syncAndSave(victim, vicData);
             }
         }
     }
@@ -295,6 +384,17 @@ public class ModEvents {
         return null;
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onLivingHeal(LivingHealEvent event) {
+        LivingEntity entity = event.getEntity();
+        if (entity.level().isClientSide) return;
+
+        MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
+        if (data.getHealInhibitTicks() > 0) {
+            event.setCanceled(true);
+        }
+    }
+
     @SubscribeEvent
     public static void onEntityTick(EntityTickEvent.Pre event) {
         if (!(event.getEntity() instanceof LivingEntity entity)) {
@@ -302,7 +402,7 @@ public class ModEvents {
         }
 
         if (entity.level().isClientSide) {
-            net.Momo_EMT.enhanced_monster.capability.MobTraitData cap = entity.getData(net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment.MOB_TRAIT);
+            MobTraitData cap = entity.getData(MobTraitAttachment.MOB_TRAIT);
             
             if (cap != null && cap.isProcessed()) { 
                 int quality = cap.getQuality(); 
@@ -315,8 +415,11 @@ public class ModEvents {
             return;
         }
 
-        if (entity.isAlive() && entity.tickCount % 20 == 0) {
+        if (entity.isAlive()) {
             MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
+
+            int currentInhibit = data.getHealInhibitTicks();
+            if (currentInhibit > 0) data.setHealInhibitTicks(currentInhibit - 1);
             
             if (data.getTraits().containsKey(EffectAllocator.REGENERATING)) {
                 handleCustomRegen(entity);
@@ -334,28 +437,33 @@ public class ModEvents {
 
     private static void handleCustomRegen(LivingEntity entity) {
         MobTraitData data = entity.getData(MobTraitAttachment.MOB_TRAIT);
-        long currentTime = entity.level().getGameTime();
 
         if (data.getInitialMaxHealth() <= 0) {
             data.setInitialMaxHealth(entity.getMaxHealth());
         }
         double originalMax = data.getInitialMaxHealth();
         
-        long cooldownEnd = data.getRegenCooldown();
-        long effectEnd = data.getRegenActiveEnd();
+        int activeTicks = data.getRegenActiveTicks(); 
+        int cooldownTicks = data.getRegenCooldownTicks();
 
         var maxHealthInstance = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
         if (maxHealthInstance == null) return;
 
-        if (currentTime < effectEnd) {
-            entity.heal((float) (entity.getMaxHealth() * 0.015f) + 2.0f);
-            if (entity.level() instanceof ServerLevel sl) {
-                sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0.0);
+        if (activeTicks > 0) {
+            data.setRegenActiveTicks(activeTicks - 1);
+
+            if (entity.tickCount % 20 == 0) {
+                int traitLevel = data.getTraits().getOrDefault(EffectAllocator.REGENERATING, 0) + 1;
+                float healAmount = (float) (entity.getMaxHealth() * (0.01f * traitLevel)) + 2.0f;
+                entity.heal(healAmount);
+                if (entity.level() instanceof ServerLevel sl) {
+                    sl.sendParticles(ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getEyeY(), entity.getZ(), 4, 0.2, 0.2, 0.2, 0);
+                }
             }
         } 
-        else if (currentTime >= cooldownEnd && entity.getHealth() <= (float) (originalMax * 0.3f)) {
-            data.setRegenActiveEnd(currentTime + 600);
-            data.setRegenCooldown(currentTime + 1200);
+        else if (cooldownTicks <= 0 && entity.getHealth() <= (float) (originalMax * 0.3f)) {
+            data.setRegenActiveTicks(600); 
+            data.setRegenCooldownTicks(1200);
 
             if (entity.getMaxHealth() > originalMax * 0.41) {
                 double currentPenalty = 0;
@@ -377,16 +485,20 @@ public class ModEvents {
             
             syncAndSave(entity, data); 
         }
+        
+        if (cooldownTicks > 0) {
+            data.setRegenCooldownTicks(cooldownTicks - 1);
+        }
     }
 
-    private static void syncAndSave(net.minecraft.world.entity.LivingEntity entity, net.Momo_EMT.enhanced_monster.capability.MobTraitData data) {
-        entity.setData(net.Momo_EMT.enhanced_monster.capability.MobTraitAttachment.MOB_TRAIT, data);
+    private static void syncAndSave(LivingEntity entity, MobTraitData data) {
+        entity.setData(MobTraitAttachment.MOB_TRAIT, data);
 
-        net.minecraft.nbt.CompoundTag syncTag = data.serializeNBT();
+        CompoundTag syncTag = data.serializeNBT();
 
         if (!entity.level().isClientSide) {
-            net.neoforged.neoforge.network.PacketDistributor.sendToPlayersTrackingEntity(entity, 
-                new net.Momo_EMT.enhanced_monster.network.PacketSyncMobTrait(entity.getId(), syncTag));
+            PacketDistributor.sendToPlayersTrackingEntity(entity, 
+                new PacketSyncMobTrait(entity.getId(), syncTag));
         }
     }
 
@@ -406,7 +518,7 @@ public class ModEvents {
                 }
                 double angle = (parent.getYRot() + (i == 0 ? 135.0F : -135.0F)) * (Math.PI / 180.0D);
                 livingSummon.moveTo(parent.getX() - Math.sin(angle) * 1.5, parent.getY(), parent.getZ() + Math.cos(angle) * 1.5, parent.getYRot(), parent.getXRot());
-                serverLevel.sendParticles(ParticleTypes.PORTAL, livingSummon.getX(), livingSummon.getY(0.5), livingSummon.getZ(), 40, 0.5, 0.5, 0.5, 0.0);
+                serverLevel.sendParticles(ParticleTypes.PORTAL, livingSummon.getX(), livingSummon.getY(0.5), livingSummon.getZ(), 40, 1, 1, 1, 0);
                 serverLevel.playSound(null, livingSummon.getX(), livingSummon.getY(), livingSummon.getZ(), 
                     net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT, 
                     net.minecraft.sounds.SoundSource.HOSTILE, 1.0F, 1.0F);

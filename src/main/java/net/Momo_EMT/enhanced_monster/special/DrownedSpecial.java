@@ -1,6 +1,7 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -46,12 +47,12 @@ public class DrownedSpecial implements ISpecialElite {
         drowned.getPersistentData().putBoolean(TAG_DROP_TRIDENT, true);
     }
 
-    private void equipArmor(Drowned drowned, EquipmentSlot slot, Item item, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
+    private void equipArmor(Drowned drowned, EquipmentSlot slot, Item item, HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
         ItemStack stack = new ItemStack(item);
         
         stack.enchant(enchantLookup.getOrThrow(Enchantments.PROTECTION), 1);
-        stack.enchant(enchantLookup.getOrThrow(Enchantments.BINDING_CURSE), 1);
         stack.enchant(enchantLookup.getOrThrow(Enchantments.VANISHING_CURSE), 1);
+        stack.enchant(enchantLookup.getOrThrow(Enchantments.BINDING_CURSE), 1);
         
         stack.set(DataComponents.UNBREAKABLE, new Unbreakable(true));
         

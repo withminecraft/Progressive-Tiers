@@ -1,6 +1,7 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -46,7 +47,7 @@ public class PiglinBruteSpecial implements ISpecialElite {
         brute.getPersistentData().putBoolean(TAG_DROP_SCRAP, true);
     }
 
-    private void equipArmor(PiglinBrute brute, EquipmentSlot slot, Item item, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
+    private void equipArmor(PiglinBrute brute, EquipmentSlot slot, Item item, HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
         ItemStack stack = new ItemStack(item);
         
         stack.enchant(enchantLookup.getOrThrow(Enchantments.PROTECTION), 1);

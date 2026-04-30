@@ -1,6 +1,7 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -62,9 +63,9 @@ public class ZombieSpecial implements ISpecialElite {
         equip(zombie, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, enchantments);
 
         ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
+        sword.enchant(enchantments.getOrThrow(Enchantments.SHARPNESS), 3);
         sword.enchant(enchantments.getOrThrow(Enchantments.KNOCKBACK), 2);
         sword.enchant(enchantments.getOrThrow(Enchantments.FIRE_ASPECT), 2);
-        sword.enchant(enchantments.getOrThrow(Enchantments.SHARPNESS), 3);
         sword.enchant(enchantments.getOrThrow(Enchantments.VANISHING_CURSE), 1);
         sword.enchant(enchantments.getOrThrow(Enchantments.BINDING_CURSE), 1);
         
@@ -73,7 +74,7 @@ public class ZombieSpecial implements ISpecialElite {
         zombie.setItemSlot(EquipmentSlot.MAINHAND, sword);
     }
 
-    private void equip(Zombie zombie, EquipmentSlot slot, Item item, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
+    private void equip(Zombie zombie, EquipmentSlot slot, Item item, HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
         ItemStack stack = new ItemStack(item);
         
         stack.enchant(enchantLookup.getOrThrow(Enchantments.PROTECTION), 1);

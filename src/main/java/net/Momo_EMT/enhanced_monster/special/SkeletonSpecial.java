@@ -1,6 +1,7 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
@@ -62,9 +63,9 @@ public class SkeletonSpecial implements ISpecialElite {
         equipArmor(skeleton, EquipmentSlot.FEET, Items.DIAMOND_BOOTS, enchantments);
 
         ItemStack bow = new ItemStack(Items.BOW);
+        bow.enchant(enchantments.getOrThrow(Enchantments.POWER), 3);
         bow.enchant(enchantments.getOrThrow(Enchantments.PUNCH), 2);
         bow.enchant(enchantments.getOrThrow(Enchantments.FLAME), 1);
-        bow.enchant(enchantments.getOrThrow(Enchantments.POWER), 3);
         bow.enchant(enchantments.getOrThrow(Enchantments.VANISHING_CURSE), 1);
         bow.enchant(enchantments.getOrThrow(Enchantments.BINDING_CURSE), 1);
         
@@ -73,7 +74,7 @@ public class SkeletonSpecial implements ISpecialElite {
         skeleton.setItemSlot(EquipmentSlot.MAINHAND, bow);
     }
 
-    private void equipArmor(Skeleton skeleton, EquipmentSlot slot, Item item, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
+    private void equipArmor(Skeleton skeleton, EquipmentSlot slot, Item item, HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
         ItemStack stack = new ItemStack(item);
         
         stack.enchant(enchantLookup.getOrThrow(Enchantments.PROTECTION), 1);

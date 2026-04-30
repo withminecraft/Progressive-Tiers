@@ -2,6 +2,7 @@ package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -41,7 +42,7 @@ public class WitherSkeletonSpecial implements ISpecialElite {
         wither.getPersistentData().putBoolean(TAG_DROP_SKULL, true);
     }
 
-    private void applyNetheriteTier(WitherSkeleton wither, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchants) {
+    private void applyNetheriteTier(WitherSkeleton wither, HolderLookup.RegistryLookup<Enchantment> enchants) {
         wither.setItemSlot(EquipmentSlot.HEAD, createEliteArmor(wither, Items.NETHERITE_HELMET, enchants));
         wither.setItemSlot(EquipmentSlot.CHEST, createEliteArmor(wither, Items.NETHERITE_CHESTPLATE, enchants));
         wither.setItemSlot(EquipmentSlot.LEGS, createEliteArmor(wither, Items.NETHERITE_LEGGINGS, enchants));
@@ -52,7 +53,7 @@ public class WitherSkeletonSpecial implements ISpecialElite {
         wither.setItemSlot(EquipmentSlot.MAINHAND, sword);
     }
 
-    private void applyCataclysmTier(WitherSkeleton wither, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchants) {
+    private void applyCataclysmTier(WitherSkeleton wither, HolderLookup.RegistryLookup<Enchantment> enchants) {
         wither.setItemSlot(EquipmentSlot.HEAD, createEliteModArmor("cataclysm:ignitium_helmet", enchants));
         wither.setItemSlot(EquipmentSlot.CHEST, createEliteModArmor("cataclysm:ignitium_chestplate", enchants));
         wither.setItemSlot(EquipmentSlot.LEGS, createEliteModArmor("cataclysm:ignitium_leggings", enchants));
@@ -65,10 +66,10 @@ public class WitherSkeletonSpecial implements ISpecialElite {
         wither.getPersistentData().putBoolean(TAG_DROP_IGNITIUM, true);
     }
 
-    private ItemStack createEliteArmor(LivingEntity entity, Item item, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchants) {
+    private ItemStack createEliteArmor(LivingEntity entity, Item item, HolderLookup.RegistryLookup<Enchantment> enchants) {
         ItemStack stack = new ItemStack(item);
-        applyEliteStatus(stack, enchants);
         stack.enchant(enchants.getOrThrow(Enchantments.PROTECTION), 1);
+        applyEliteStatus(stack, enchants);
 
         if (item instanceof ArmorItem) {
             var registryAccess = entity.level().registryAccess();
@@ -81,19 +82,19 @@ public class WitherSkeletonSpecial implements ISpecialElite {
         return stack;
     }
 
-    private ItemStack createEliteModArmor(String registryName, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchants) {
+    private ItemStack createEliteModArmor(String registryName, HolderLookup.RegistryLookup<Enchantment> enchants) {
         ItemStack stack = getModItem(registryName);
-        applyEliteStatus(stack, enchants);
         stack.enchant(enchants.getOrThrow(Enchantments.PROTECTION), 1);
+        applyEliteStatus(stack, enchants);
         return stack;
     }
 
-    private void applyEliteWeaponMods(ItemStack stack, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchants) {
-        applyEliteStatus(stack, enchants);
+    private void applyEliteWeaponMods(ItemStack stack, HolderLookup.RegistryLookup<Enchantment> enchants) {
         stack.enchant(enchants.getOrThrow(Enchantments.SHARPNESS), 3);
+        applyEliteStatus(stack, enchants);
     }
 
-    private void applyEliteStatus(ItemStack stack, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchants) {
+    private void applyEliteStatus(ItemStack stack, HolderLookup.RegistryLookup<Enchantment> enchants) {
         if (stack.isEmpty()) return;
         stack.enchant(enchants.getOrThrow(Enchantments.VANISHING_CURSE), 1);
         stack.enchant(enchants.getOrThrow(Enchantments.BINDING_CURSE), 1);

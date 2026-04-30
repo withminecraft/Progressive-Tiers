@@ -14,10 +14,12 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
     private boolean isBoss = false;
 
     private double initialMaxHealth = -1;
-    private long regenCooldown = 0;
-    private long regenActiveEnd = 0;
+    private int regenCooldownTicks = 0;
+    private int regenActiveTicks = 0;
 
     private long voidCooldown = 0;
+
+    private int healInhibitTicks = 0;
 
     public MobTraitData() {}
 
@@ -32,13 +34,16 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
 
     public double getInitialMaxHealth() { return initialMaxHealth; }
     public void setInitialMaxHealth(double initialMaxHealth) { this.initialMaxHealth = initialMaxHealth; }
-    public long getRegenCooldown() { return regenCooldown; }
-    public void setRegenCooldown(long regenCooldown) { this.regenCooldown = regenCooldown; }
-    public long getRegenActiveEnd() { return regenActiveEnd; }
-    public void setRegenActiveEnd(long regenActiveEnd) { this.regenActiveEnd = regenActiveEnd; }
+    public int getRegenCooldownTicks() { return regenCooldownTicks; }
+    public void setRegenCooldownTicks(int ticks) { this.regenCooldownTicks = ticks; }
+    public int getRegenActiveTicks() { return regenActiveTicks; }
+    public void setRegenActiveTicks(int ticks) { this.regenActiveTicks = ticks; }
 
     public long getVoidCooldown() { return voidCooldown; }
     public void setVoidCooldown(long voidCooldown) { this.voidCooldown = voidCooldown; }
+
+    public int getHealInhibitTicks() { return healInhibitTicks; }
+    public void setHealInhibitTicks(int ticks) { this.healInhibitTicks = ticks; }
 
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
@@ -60,10 +65,12 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
         nbt.put("Traits", traitsTag);
 
         nbt.putDouble("InitialMaxHealth", this.initialMaxHealth);
-        nbt.putLong("RegenCD", this.regenCooldown);
-        nbt.putLong("RegenActiveEnd", this.regenActiveEnd);
+        nbt.putInt("RegenCDTicks", this.regenCooldownTicks);
+        nbt.putInt("RegenActiveTicks", this.regenActiveTicks);
 
         nbt.putLong("VoidCD", this.voidCooldown);
+
+        nbt.putInt("HealInhibitTicks", this.healInhibitTicks);
 
         return nbt;
     }
@@ -74,10 +81,12 @@ public class MobTraitData implements INBTSerializable<CompoundTag> {
         this.isBoss = nbt.getBoolean("IsBoss");
 
         this.initialMaxHealth = nbt.getDouble("InitialMaxHealth");
-        this.regenCooldown = nbt.getLong("RegenCD");
-        this.regenActiveEnd = nbt.getLong("RegenActiveEnd");
+        this.regenCooldownTicks = nbt.getInt("RegenCDTicks");
+        this.regenActiveTicks = nbt.getInt("RegenActiveTicks");
 
         this.voidCooldown = nbt.getLong("VoidCD");
+
+        this.healInhibitTicks = nbt.getInt("HealInhibitTicks");
 
         this.traits.clear();
         if (nbt.contains("Traits", Tag.TAG_COMPOUND)) {

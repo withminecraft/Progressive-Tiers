@@ -65,6 +65,15 @@ public class TraitItem extends Item {
         MobTraitData data = target.getData(MobTraitAttachment.MOB_TRAIT);
         Map<String, Integer> traits = data.getTraits();
 
+        if (this.traitType.equals(EffectAllocator.PROTECTED) && traits.containsKey(EffectAllocator.ELUSIVE)) {
+            player.displayClientMessage(Component.translatable("chat.enhanced_monster.conflict_elusive").withStyle(ChatFormatting.RED), true);
+            return InteractionResult.FAIL;
+        }
+        if (this.traitType.equals(EffectAllocator.ELUSIVE) && traits.containsKey(EffectAllocator.PROTECTED)) {
+            player.displayClientMessage(Component.translatable("chat.enhanced_monster.conflict_protected").withStyle(ChatFormatting.RED), true);
+            return InteractionResult.FAIL;
+        }
+
         if (traits.containsKey(traitType)) {
             if (itemLevel <= traits.get(traitType)) {
                 player.displayClientMessage(Component.translatable("chat.enhanced_monster.level_too_low").withStyle(ChatFormatting.YELLOW), true);

@@ -19,6 +19,7 @@ public class StructureValidator {
         "bastion_remnant", Set.of("minecraft:piglin", "minecraft:piglin_brute"),
         "mansion", Set.of("minecraft:vindicator", "minecraft:evoker"),
         "stronghold", Set.of("minecraft:creeper", "minecraft:spider"),
+        "citadel", Set.of("irons_spellbooks:citadel_keeper"),
         "trial_chambers", Set.of("ALL_MOBS")
     );
 

@@ -1,6 +1,7 @@
 package net.Momo_EMT.enhanced_monster.special;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -43,8 +44,8 @@ public class PiglinSpecial implements ISpecialElite {
             piglin.setItemSlot(EquipmentSlot.MAINHAND, sword);
         } else {
             ItemStack crossbow = new ItemStack(Items.CROSSBOW);
-            crossbow.enchant(enchantments.getOrThrow(Enchantments.QUICK_CHARGE), 3);
             crossbow.enchant(enchantments.getOrThrow(Enchantments.PIERCING), 4);
+            crossbow.enchant(enchantments.getOrThrow(Enchantments.QUICK_CHARGE), 3);
             applyEliteStatus(crossbow, enchantments);
             piglin.setItemSlot(EquipmentSlot.MAINHAND, crossbow);
         }
@@ -52,7 +53,7 @@ public class PiglinSpecial implements ISpecialElite {
         piglin.getPersistentData().putBoolean(TAG_DROP_GOLD, true);
     }
 
-    private void equipGoldArmor(Piglin piglin, EquipmentSlot slot, Item item, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
+    private void equipGoldArmor(Piglin piglin, EquipmentSlot slot, Item item, HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
         ItemStack stack = new ItemStack(item);
         stack.enchant(enchantLookup.getOrThrow(Enchantments.PROTECTION), 4);
         
@@ -63,7 +64,7 @@ public class PiglinSpecial implements ISpecialElite {
         piglin.setItemSlot(slot, stack);
     }
 
-    private void applyEliteStatus(ItemStack stack, net.minecraft.core.HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
+    private void applyEliteStatus(ItemStack stack, HolderLookup.RegistryLookup<Enchantment> enchantLookup) {
         stack.enchant(enchantLookup.getOrThrow(Enchantments.VANISHING_CURSE), 1);
         stack.enchant(enchantLookup.getOrThrow(Enchantments.BINDING_CURSE), 1);
         

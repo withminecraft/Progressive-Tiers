@@ -43,6 +43,36 @@ public class EffectAllocator {
     public static final String VOID = NBT_PREFIX + "void";
     public static final String SUMMONER = NBT_PREFIX + "summoner";
     public static final String WITHERING = NBT_PREFIX + "withering";
+    public static final String EROSIVE = NBT_PREFIX + "erosive";
+    public static final String ELUSIVE = NBT_PREFIX + "elusive";
+
+    private static boolean applyManualTraits(LivingEntity entity, MobTraitData data) {
+        ResourceLocation rl = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+        if (rl == null) return false;
+        String entityId = rl.toString();
+
+        boolean hasManual = false;
+        
+        for (Map.Entry<String, Set<String>> entry : ModConfig.TRAIT_MANUAL_MAP.entrySet()) {
+            if (entry.getValue().contains(entityId)) {
+                String traitTag = entry.getKey();
+                
+                int maxLevel = EffectPools.getMaxLevelForTrait(traitTag);
+                
+                data.addTrait(traitTag, maxLevel); 
+                applyImmediateAttributes(entity, traitTag, maxLevel);
+                hasManual = true;
+            }
+        }
+
+        if (hasManual) {
+            data.setProcessed(true);
+            data.setBoss(true);
+            
+            return true;
+        }
+        return false;
+    }
 
     public static void apply(LivingEntity entity) {
         if (entity.level().isClientSide) return;
@@ -56,7 +86,11 @@ public class EffectAllocator {
         String entityId = entityKey.toString();
 
         boolean isMobBoss = ModConfig.CACHED_BOSS_LIST.contains(entityId);
-        if (!isMobBoss) {
+
+        boolean isManualBoss = ModConfig.TRAIT_MANUAL_MAP.values().stream()
+                            .anyMatch(set -> set.contains(entityId));
+
+        if (!isMobBoss && !isManualBoss) {
             if (!(entity instanceof Enemy) || !isAllowed(entity)) return;
         }
 
@@ -66,17 +100,22 @@ public class EffectAllocator {
         int quality;
         int count;
 
+        if (applyManualTraits(entity, data)) {
+            SpecialManager.tryApply(entity, 3);
+            syncAndSave(entity, data);
+            return;
+        }
         if (isMobBoss) {
             quality = 3;
             count = 6;
-            giveEffects(entity, count, quality, true, data);
+            giveEffects(entity, count, quality, data);
         } 
         else if (isEntityInSpecialStructure(entity)) {
             quality = rollStructureQuality(); 
             count = getCountForQuality(quality);
             adjustHealth(entity, quality);
             if (count > 0) {
-                giveEffects(entity, count, quality, quality == 3, data);
+                giveEffects(entity, count, quality, data);
             }
         }
         else {
@@ -85,12 +124,12 @@ public class EffectAllocator {
             if (maxHealth > ModConfig.TIER_2_LIMIT.get()) tier = 3;
             else if (maxHealth > ModConfig.TIER_1_LIMIT.get()) tier = 2;
 
-            quality = rollQuality(tier);
+            quality = rollQuality(entity, tier);
             count = getCountForQuality(quality);
 
             adjustHealth(entity, quality);
             if (count > 0) {
-                giveEffects(entity, count, quality, quality == 3, data);
+                giveEffects(entity, count, quality, data);
             }
         }
 
@@ -142,12 +181,35 @@ public class EffectAllocator {
         return 3;    
     }
 
-    private static int rollQuality(int tier) {
-        int roll = RANDOM.nextInt(1000);
+    private static int rollQuality(LivingEntity entity, int tier) {
+        long dayTime = entity.level().getDayTime();
+        int days = (int) (dayTime / 24000);
+        int progressDays = Math.min(days, 100);
+
+        int roll = RANDOM.nextInt(10000);
+
         return switch (tier) {
-            case 1 -> (roll < 900) ? 1 : (roll < 995 ? 2 : 3);
-            case 2 -> (roll < 150) ? 1 : (roll < 900 ? 2 : 3);
-            default -> (roll < 10) ? 1 : (roll < 250 ? 2 : 3);
+            case 1 -> {
+                int q1 = 10000 - (progressDays * 16);
+                int q2 = progressDays * 15;
+                
+                if (roll < q1) yield 1;
+                if (roll < q1 + q2) yield 2;
+                yield 3;
+            }
+            case 2 -> {
+                int q1 = 4500 - (progressDays * 30);
+                int q2 = 5000 + (progressDays * 25);
+                
+                if (roll < q1) yield 1;
+                if (roll < q1 + q2) yield 2;
+                yield 3;
+            }
+            default -> {
+                if (roll < 100) yield 1;
+                if (roll < 2500) yield 2;
+                yield 3;
+            }
         };
     }
 
@@ -161,7 +223,7 @@ public class EffectAllocator {
         };
     }
 
-    private static void giveEffects(LivingEntity entity, int count, int quality, boolean shouldGlow, MobTraitData data) {
+    private static void giveEffects(LivingEntity entity, int count, int quality, MobTraitData data) {
         List<EffectPools.EffectEntry> pool = new ArrayList<>(EffectPools.getPool(quality, isBoss(entity)));
         Collections.shuffle(pool);
 
@@ -183,13 +245,20 @@ public class EffectAllocator {
 
     public static void applyImmediateAttributes(LivingEntity entity, String tag, int level) {
         if (tag.equals(POWERFUL)) {
-            safeApplyModifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_ID, (level + 1) * 2.0, AttributeModifier.Operation.ADD_VALUE);
+            safeApplyModifier(entity, Attributes.ATTACK_DAMAGE, DAMAGE_MODIFIER_ID, 
+                (level + 1) * ModConfig.CACHED_POWERFUL_DAMAGE, AttributeModifier.Operation.ADD_VALUE);
         } else if (tag.equals(SPEEDY)) {
-            safeApplyModifier(entity, Attributes.MOVEMENT_SPEED, SPEED_MODIFIER_ID, (level + 1) * 0.1, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
+            safeApplyModifier(entity, Attributes.MOVEMENT_SPEED, SPEED_MODIFIER_ID, 
+                (level + 1) * ModConfig.CACHED_SPEEDY_VALUE, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         } else if (tag.equals(TANKY)) {
-            safeApplyModifier(entity, Attributes.ARMOR, ARMOR_MODIFIER_ID, (level + 1) * 4.0, AttributeModifier.Operation.ADD_VALUE);
-            safeApplyModifier(entity, Attributes.ARMOR_TOUGHNESS, TOUGHNESS_MODIFIER_ID, (level + 1) * 4.0, AttributeModifier.Operation.ADD_VALUE);
-            safeApplyModifier(entity, Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_MODIFIER_ID, (level + 1) * 0.2, AttributeModifier.Operation.ADD_VALUE);
+            safeApplyModifier(entity, Attributes.ARMOR, ARMOR_MODIFIER_ID, 
+                (level + 1) * ModConfig.CACHED_TANKY_ARMOR, AttributeModifier.Operation.ADD_VALUE);
+            
+            safeApplyModifier(entity, Attributes.ARMOR_TOUGHNESS, TOUGHNESS_MODIFIER_ID, 
+                (level + 1) * ModConfig.CACHED_TANKY_TOUGHNESS, AttributeModifier.Operation.ADD_VALUE);
+            
+            safeApplyModifier(entity, Attributes.KNOCKBACK_RESISTANCE, KNOCKBACK_MODIFIER_ID, 
+                (level + 1) * ModConfig.CACHED_TANKY_KNOCKBACK, AttributeModifier.Operation.ADD_VALUE);
         }
     }
 
@@ -238,8 +307,8 @@ public class EffectAllocator {
 
     private static boolean isIncompatible(String trait1, String trait2) {
         if (trait1.equals(trait2)) return true;
-        if (trait1.equals(PROTECTED) && trait2.equals(REGENERATING)) return true;
-        if (trait1.equals(REGENERATING) && trait2.equals(PROTECTED)) return true;
+        if (trait1.equals(PROTECTED) && trait2.equals(ELUSIVE)) return true;
+        if (trait1.equals(ELUSIVE) && trait2.equals(PROTECTED)) return true;
         if (trait1.equals(VOID)) return trait2.equals(BERSERK) || trait2.equals(POWERFUL);
         if (trait1.equals(BERSERK) || trait1.equals(POWERFUL)) return trait2.equals(VOID);
         return false;
